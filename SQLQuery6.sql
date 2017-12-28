@@ -243,6 +243,20 @@ ON T.RTypeID = S.RTypeID
 
 SELECT * FROM vServant
 
+-- Create View Customer Biodata
+CREATE VIEW vCustBio
+AS
+SELECT U.CustID, U.NIK, U.CustName, U.Gender, U.DateOfBirth, U.Age, K.Telephone, K.EmaiL, A.Address, A.ZipCode, A.City, C.AccountNum, C.AccountName, C.BankName
+FROM Users.Customer U
+LEFT OUTER JOIN Users.CustContact K
+ON U.CustID = K.CustID
+LEFT OUTER JOIN Users.CustAddress A
+ON U.CustID = A.CustID
+LEFT OUTER JOIN Users.CustAccount C
+ON U.CustID = C.CustID
+
+SELECT * FROM vCustBio
+
 
 
 
