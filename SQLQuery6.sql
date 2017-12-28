@@ -174,7 +174,7 @@ CREATE TABLE Transactions.Invoice(
 	DueDateDP		DATETIME DEFAULT DATEADD(DAY, 1, CONVERT(DATE, GETDATE())) CHECK(DueDateDP = DATEADD(DAY, 1, CONVERT(DATE, GETDATE()))) NOT NULL,	
 	DPStatus		INT DEFAULT 0 CHECK(DPStatus IN(1, 0)) NOT NULL,
 	Repayment		MONEY CHECK(Repayment >= 0) NOT NULL,
-	DueDateRePay	DATETIME DEFAULT DATEADD(MONTH, 1, CONVERT(DATE, GETDATE())) NOT NULL,
+	DueDateRePay	DATETIME DEFAULT DATEADD(DAY, 1, CONVERT(DATE, GETDATE())) NOT NULL,
 	RePayStatus		INT DEFAULT 0 CHECK(RePayStatus IN(1, 0)) NOT NULL
 );
 
@@ -213,7 +213,7 @@ IF @EID = (
 		--PRINT 'Access Allowed';
 BEGIN
 		--<Batch Trans
-		DECLARE @CountT INT, @TransID VARCHAR(5)
+		DECLARE @CountT INT, @TransID VARCHAR(5), @DCOUT DATETIME, @TC MONEY, @Price MONEY, @DP MONEY, @RP MONEY
 		SELECT @CountT = ID FROM Transactions.MainTrans
 		WHERE @TransID = '0'
 		SET @TransID = (
@@ -225,6 +225,20 @@ BEGIN
 			END
 			)
 		SET @TransID = @TransID + CAST(@CountT AS VARCHAR(5))
+
+		SET @DCOUT = DATEADD(YEAR, @POT, CONVERT(DATE, @DCIN))
+		SELECT @Price = Price FROM Services.RoomType
+		WHERE RTypeID = (
+							SELECT T.RTypeID FROM Services.RoomType T
+							INNER JOIN Services.RoomNum N
+							ON T.RTypeID = N.RTypeID
+							WHERE N.RoomNum = @RN
+						)
+		SET @TC = @Price * @POT
+
+		SET @DP = @TC * 0.1  --DP = 10% Total Cost
+		SET @RP = @TC * 0.9  --Repayment = 90% Total Cost
+
 		--?>
 		
 		--<Batch Cust
@@ -257,8 +271,8 @@ BEGIN
 		INSERT Transactions.CostRoom(RoomNum, PeriodOfTime, DateOfCheckIn, DateOfCheckOut, TotalCost)
 			VALUES(@RN, @POT, @DCIN, @DCOUT, @TC);
 
-		INSERT Transactions.Invoice(TransID, AccountNum, TotalInvoice, DP, DueDateDP, DPStatus, Repayment, DueDateRePay, RePayStatus)
-			VALUES(@TransID, @AccNum, @TInv, @DP, @DPDD, @DPS, @RP, @RPDD,RPS);
+		INSERT Transactions.Invoice(TransID, AccountNum, TotalInvoice, DP, Repayment, DueDateRePay)
+			VALUES(@TransID, @AccNum, @TC, @DP, @RP, @DCIN);
 
 		INSERT Users.Customer(NIK, CustName, Gender, DateOfBirth, Job)
 			VALUES(@NIK, @Name, @Gender, @DOB, @Job);
