@@ -413,6 +413,21 @@ EXEC spUPDATE 20, 'INFORMATION TECNOLOGY'
 SELECT * FROM HumanResources.Department
 
 
+--FUNCTION
+CREATE FUNCTION HumanResources.FSEARCHNAMME(@GNAME VARCHAR(20))
+RETURNS TABLE
+AS
+	RETURN(
+		SELECT * FROM HumanResources.Department
+		WHERE GroupName LIKE '%' + @GNAME + '%'
+	)
+	GO
+
+SELECT * FROM HumanResources.FSEARCHNAMME('RES')
+
+
+
+
 
 
 --TRIGGER

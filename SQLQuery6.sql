@@ -99,6 +99,7 @@ CREATE TABLE Services.RoomNum(
 );
 
 --Create Table Customer
+DROP TABLE Users.Customer
 CREATE TABLE Users.Customer(
 	ID				INT IDENTITY NOT NULL,
 	CustID			VARCHAR(5) DEFAULT 0 PRIMARY KEY,
@@ -109,12 +110,14 @@ CREATE TABLE Users.Customer(
 	Age				INT CHECK(Age > 0)
 );
 
+DROP TABLE Users.CustContact
 CREATE TABLE Users.CustContact(
 	CustID		VARCHAR(5) REFERENCES Users.Customer(CustID) ON DELETE CASCADE ON UPDATE CASCADE PRIMARY KEY NOT NULL,
 	Telephone	BIGINT CHECK(Telephone BETWEEN 1000000 AND 999999999999) UNIQUE NOT NULL,
 	EmaiL		VARCHAR(100) CHECK(Email LIKE '[A-Z]%@[A-Z]%.%')
 );
 
+DROP TABLE Users.CustAddress
 CREATE TABLE Users.CustAddress(
 	CustID		VARCHAR(5) REFERENCES Users.Customer(CustID) ON DELETE CASCADE ON UPDATE CASCADE PRIMARY KEY NOT NULL,
 	Address		VARCHAR(200) CHECK(Address NOT LIKE '%[!~`@#$%^&*_+={}:<>?;'']%') NOT NULL,
@@ -123,6 +126,7 @@ CREATE TABLE Users.CustAddress(
 	Province	VARCHAR(30) CHECK(Province NOT LIKE '%[!~`@#$%^&*_+={}:<>?;'']%')
 );
 
+DROP TABLE Users.CustAccount
 CREATE TABLE Users.CustAccount(
 	CustID		VARCHAR(5) REFERENCES Users.Customer(CustID) ON DELETE CASCADE ON UPDATE CASCADE UNIQUE NOT NULL,
 	AccountNum	VARCHAR(19) CHECK(AccountNum LIKE '[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]') UNIQUE NOT NULL,
@@ -553,16 +557,16 @@ GO
 
 --Hint >> @EID VARCHAR(5), @EmpID VARCHAR(5), @RTID VARCHAR(10), @SC INT
 
+EXEC spInsServ 'E0016', 'E0055', 'R-I', 911
 EXEC spInsServ 'E0016', 'E0056', 'R-I', 911
-EXEC spInsServ 'E0016', 'E0057', 'R-I', 911
+EXEC spInsServ 'E0016', 'E0057', 'R-II', 922
 EXEC spInsServ 'E0016', 'E0058', 'R-II', 922
-EXEC spInsServ 'E0016', 'E0059', 'R-II', 922
+EXEC spInsServ 'E0016', 'E0059', 'R-III', 933
 EXEC spInsServ 'E0016', 'E0060', 'R-III', 933
-EXEC spInsServ 'E0016', 'E0061', 'R-III', 933
+EXEC spInsServ 'E0016', 'E0061', 'R-IV', 944
 EXEC spInsServ 'E0016', 'E0062', 'R-IV', 944
-EXEC spInsServ 'E0016', 'E0063', 'R-IV', 944
+EXEC spInsServ 'E0016', 'E0063', 'R-V', 955
 EXEC spInsServ 'E0016', 'E0064', 'R-V', 955
-EXEC spInsServ 'E0016', 'E0065', 'R-V', 955
 
 --Insert RoomNum
 SELECT * FROM Services.RoomNum
@@ -629,6 +633,7 @@ EXEC spInsRoom 'E0016', 'R-V', 'J', 10
 
 --- DELETE RECORD ---
 -- Delete Divisions
+SELECT * FROM HumanResources.Divisions
 CREATE PROC spDelDiv @EID VARCHAR(5), @DivID VARCHAR(10)
 AS
 IF @EID = (
@@ -653,9 +658,10 @@ ELSE
 GO
 
 --Hint >>  @EID VARCHAR(5), @DivID VARCHAR(10)
-EXEC spDelDiv 'E0007', 'QADIV'
+EXEC spDelDiv 'E0007', 'OPDIV'
 
 -- Delete Incumbency
+SELECT * FROM HumanResources.Incumbency
 CREATE PROC spDelInc @EID VARCHAR(5), @IncID VARCHAR(10)
 AS
 IF @EID = (
@@ -683,6 +689,7 @@ GO
 EXEC spDelInc 'E0007', 'LO'
 
 -- Delete Employee
+SELECT * FROM vEmployee
 CREATE PROC spDelEmp @EID VARCHAR(5), @EmpID VARCHAR(5)
 AS
 IF @EID = (
@@ -710,6 +717,7 @@ GO
 EXEC spDelEmp 'E0024', 'E0008'
 
 -- Delete RoomType
+SELECT * FROM Services.RoomType
 CREATE PROC spDelRoomType @EID VARCHAR(5), @RTID VARCHAR(10)
 AS
 IF @EID = (
@@ -737,6 +745,7 @@ GO
 EXEC spDelRoomType 'E0016', 'R-II'
 
 -- Delete Servant
+SELECT * FROM Services.Servant
 CREATE PROC spDelServ @EID VARCHAR(5), @EmpID VARCHAR(5)
 AS
 IF @EID = (
@@ -766,6 +775,7 @@ GO
 EXEC spDelServ 'E0016', 'E0060'
 
 -- Delete RoomNum
+SELECT * FROM vRoom
 CREATE PROC spDelRoomNum @EID VARCHAR(5), @RN VARCHAR(5)
 AS
 IF @EID = (
