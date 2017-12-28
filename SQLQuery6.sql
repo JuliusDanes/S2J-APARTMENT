@@ -158,10 +158,10 @@ CREATE TABLE Transactions.TransHistory(
 DROP TABLE Transactions.CostRoom
 CREATE TABLE Transactions.CostRoom(
 	RoomNum			VARCHAR(5) REFERENCES Services.RoomNum(RoomNum) PRIMARY KEY NOT NULL,
+	PeriodOfTime	INT CONSTRAINT cPT CHECK(PeriodOfTime BETWEEN 1 AND 50) NOT NULL,
 	DateOfCheckIn	DATETIME DEFAULT CONVERT(DATE, GETDATE()) CONSTRAINT cIN CHECK(DateOfCheckIn >= CONVERT(DATE, GETDATE()) 
 					AND DateOfCheckIn <= DATEADD(DAY, 7, CONVERT(DATE, GETDATE()))) NOT NULL, --VR GETDATE()
 	DateOfCheckOut	DATETIME DEFAULT DATEADD(YEAR, 1, CONVERT(DATE, GETDATE())) CONSTRAINT cOUT CHECK(DateOfCheckOut >= DATEADD(YEAR, 1, CONVERT(DATE, GETDATE()))) NOT NULL, --VR GETDATE() YY + 1
-	PeriodOfTime	INT CONSTRAINT cPT CHECK(PeriodOfTime BETWEEN 1 AND 50) NOT NULL,
 	TotalCost		MONEY CONSTRAINT cTC CHECK(TotalCost > 0)
 );
 
@@ -203,6 +203,86 @@ ON M.CustID = U.CustID
 
 SELECT * FROM vCustTrans
 
+
+--Insert Transactions
+CREATE PROC spInsTrans @EID VARCHAR(5), @RN VARCHAR(5), @POT INT, @DCIN DATETIME, @NIK BIGINT, @Name VARCHAR(30), @Gender VARCHAR(10), @DOB DATETIME, @Job VARCHAR(30), @Telp BIGINT, @Email VARCHAR(100), @Add VARCHAR(200), @ZC INT, @City VARCHAR(30), @Prov VARCHAR(30), @AccNum VARCHAR(19), @AccName VARCHAR(30), @BName VARCHAR(30)
+AS
+IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID = 'MCSO' OR IncumbencyID = 'CSO') AND EmpID = @EID)
+		--PRINT 'Access Allowed';
+BEGIN
+		--<Batch Trans
+		DECLARE @CountT INT, @TransID VARCHAR(5)
+		SELECT @CountT = ID FROM Transactions.MainTrans
+		WHERE @TransID = '0'
+		SET @TransID = (
+			CASE
+				WHEN (@CountT < 10) THEN 'T000'
+				WHEN (@CountT >= 10) AND (@CountT < 100) THEN 'T00'
+				WHEN (@CountT >= 100) AND (@CountT < 1000) THEN 'T0'
+				WHEN (@CountT >= 1000) AND (@CountT < 10000) THEN 'T'
+			END
+			)
+		SET @TransID = @TransID + CAST(@CountT AS VARCHAR(5))
+		--?>
+		
+		--<Batch Cust
+		DECLARE @CountC INT, @CustID VARCHAR(5), @Age INT
+		SELECT @CountC = ID FROM Users.Customer
+		WHERE @CustID = '0'
+		SET @CustID = (
+			CASE
+				WHEN (@CountC < 10) THEN 'C000'
+				WHEN (@CountC >= 10) AND (@CountC < 100) THEN 'C00'
+				WHEN (@CountC >= 100) AND (@CountC < 1000) THEN 'C0'
+				WHEN (@CountC >= 1000) AND (@CountC < 10000) THEN 'C'
+			END
+			)
+		SET @CustID = @CustID + CAST(@CountC AS VARCHAR(5))
+		SET @Age = FLOOR(DATEDIFF(DAY, @DOB, GETDATE()) / 365.25)
+
+		UPDATE Users.Customer
+		SET CustID = @CustID,
+			Age = @Age
+		WHERE @CustID = '0'
+		--?>
+		
+		INSERT Transactions.MainTrans(TransID, CustID, EmpID, RoomNum)
+			VALUES(@TransID, @CustID, @EID, @RN);
+			
+		INSERT Transactions.TransHistory(TransID)
+			VALUES(@TransID);
+
+		INSERT Transactions.CostRoom(RoomNum, PeriodOfTime, DateOfCheckIn, DateOfCheckOut, TotalCost)
+			VALUES(@RN, @POT, @DCIN, @DCOUT, @TC);
+
+		INSERT Transactions.Invoice(TransID, AccountNum, TotalInvoice, DP, DueDateDP, DPStatus, Repayment, DueDateRePay, RePayStatus)
+			VALUES(@TransID, @AccNum, @TInv, @DP, @DPDD, @DPS, @RP, @RPDD,RPS);
+
+		INSERT Users.Customer(NIK, CustName, Gender, DateOfBirth, Job)
+			VALUES(@NIK, @Name, @Gender, @DOB, @Job);
+
+		INSERT Users.CustContact
+			VALUES(@CustID, @Telp, @Email);
+
+		INSERT Users.CustAddress
+			VALUES(@CustID, @Add, @ZC, @City, @Prov);
+
+		INSERT Users.CustAccount
+			VALUES(@CustID, @AccNum, @AccName, @BName);
+		PRINT 'Transaction ' + @TransID + ' for booking room number ' + @RN + ' with user id ' + @CustID + ' [' + @Name + ']' + ' successfully Added +'
+END
+
+ELSE IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID != 'MCSO' AND IncumbencyID != 'CSO') AND EmpID = @EID)
+		PRINT 'You [' + CAST(@EID AS VARCHAR(5)) + '] are no Authorized !';
+ELSE
+	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
+GO
+
+EXEC spMainTrans 'E0030', 
 
 
 
