@@ -189,9 +189,59 @@ GO
 
 SELECT * FROM Transactions.Payment
 
+--- CREATE VIEW ---
+-- Create View Incumbency & Divisions
+CREATE VIEW vIncDiv
+AS
+SELECT I.IncumbencyID, I.IncumbencyName, I.DivID, D.DivName, D.ChiefID
+FROM HumanResources.Incumbency I
+JOIN HumanResources.Divisions D
+ON I.DivID = D.DivID
+
+SELECT * FROM vIncDiv
+
+-- Create View Employee
+CREATE VIEW vEmployee
+AS
+SELECT E.EmpID, E.NIK, E.EmpName, E.Gender, E.DateOfBirth, E.Age, E.MaritalStatus, K.Telephone, K.EmaiL, A.Address, A.ZipCode, A.City, A.Province, C.AccountNum, C.AccountName, C.BankName, I.IncumbencyID, I.IncumbencyName, D.DivName, D.ChiefID
+FROM HumanResources.Employee E
+LEFT OUTER JOIN HumanResources.EmpContact K
+ON E.EmpID = K.EmpID
+LEFT OUTER JOIN HumanResources.EmpAddress A
+ON E.EmpID = A.EmpID
+LEFT OUTER JOIN HumanResources.EmpAccount C
+ON E.EmpID = C.EmpID
+LEFT OUTER JOIN HumanResources.Incumbency I
+ON E.IncumbencyID = I.IncumbencyID
+LEFT OUTER JOIN HumanResources.Divisions D
+ON I.DivID = D.DivID
+
+SELECT * FROM vEmployee
+
+-- Create View Room
+CREATE VIEW vRoom
+AS
+SELECT N.RoomNum, N.Status, N.RTypeID, T.RTypeName, T.Price, T.RoomAvailable, T.RoomIsUsed
+FROM Services.RoomNum N
+LEFT OUTER JOIN Services.RoomType T
+ON N.RTypeID = T.RTypeID
+
+SELECT * FROM vRoom
+
+-- Create View Servant
+CREATE VIEW vServant
+AS
+SELECT T.RTypeID, T.RTypeName, S.SerName, S.EmpID, S.SerContact FROM Services.RoomType T 
+INNER JOIN Services.Servant S
+ON T.RTypeID = S.RTypeID
+
+SELECT * FROM vServant
 
 
---- INSERT TABLE
+
+
+
+--- INSERT TABLE ---
 --Insert Divisions
 SELECT * FROM HumanResources.Divisions
 ALTER PROC spInsDiv @EID VARCHAR(5), @DivID VARCHAR(10), @DivName VARCHAR(100), @ChiefID VARCHAR(5)
@@ -225,7 +275,6 @@ EXEC spInsDiv 'FOUND', 'LEGDIV', 'Legal', 'E0008'
 EXEC spInsDiv 'FOUND', 'MIDIV', 'Marketing and Information', 'E0009'
 EXEC spInsDiv 'FOUND', 'CDDIV', 'Creative Development', 'E0010'
 EXEC spInsDiv 'FOUND', 'QADIV', 'Quality Assurance', 'E0011'
-
 
 --Insert Incumbency
 SELECT * FROM HumanResources.Incumbency
@@ -310,7 +359,7 @@ ALTER PROC spInsEmp @EID VARCHAR(5), @NIK BIGINT, @Name VARCHAR(30), @Gender VAR
 AS
 IF @EID = 'FOUND' OR @EID = (
 	SELECT EmpID FROM vEmployee
-	WHERE (IncumbencyID = 'CHRO' OR IncumbencyID = 'MHRO') AND EmpID = @EID)
+	WHERE (IncumbencyID = 'MHRO' OR IncumbencyID = 'HRO') AND EmpID = @EID)
 		--PRINT 'Access Allowed';
 BEGIN
 		INSERT HumanResources.Employee(NIK, EmpName, Gender, DateOfBirth, MaritalStatus, IncumbencyID, Salary)
@@ -351,7 +400,7 @@ BEGIN
 END
 ELSE IF @EID = (
 	SELECT EmpID FROM vEmployee
-	WHERE (IncumbencyID != 'CHRO' AND IncumbencyID != 'MHRO') AND EmpID = @EID)
+	WHERE (IncumbencyID != 'MHRO' AND IncumbencyID != 'HRO') AND EmpID = @EID)
 		PRINT 'You [' + CAST(@EID AS VARCHAR(5)) + '] are no Authorized !';
 ELSE
 	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
@@ -363,6 +412,7 @@ SELECT * FROM HumanResources.Employee
 SELECT * FROM HumanResources.EmpContact
 SELECT * FROM HumanResources.EmpAddress
 SELECT * FROM HumanResources.EmpAccount
+TRUNCATE TABLE HumanResources.Employee
 
 EXEC spInsEmp 'FOUND', 3175042512990006, 'Shafira Az"zahra', 'F', '1990-01-02', 'M', 085284843201, 'shafira.azzahra@yahoo.com', 'Jl Raya Bogor No 78', 13510, 'Jakarta', 'DKI Jakarta', '1234-5678-1234-5678', 'Shafira Azzahra', 'Bukopin', 'FOUNDER', NULL
 EXEC spInsEmp 'FOUND', 3175042512990001, 'Julius Danes Nugroho', 'M', '1990-12-25', 'M', 085284843202, 'julius.danes.nugroho@gmail.com', 'Jl. Bangun Raya No 23', 13550, 'Jakarta', 'DKI Jakarta', '1234-5678-8765-4321', 'Julius Danes', 'Bukopin', 'FOUNDER', NULL
@@ -568,97 +618,206 @@ EXEC spInsRoom 'E0016', 'R-IV', 'J', 10
 EXEC spInsRoom 'E0016', 'R-V', 'J', 10
 
 
-
-
---ALTER PROC spInsRoom @RN VARCHAR(5), @RTID VARCHAR(10)
+--- DELETE RECORD ---
+-- Delete Divisions
+CREATE PROC spDelDiv @EID VARCHAR(5), @DivID VARCHAR(10)
 AS
-INSERT Services.RoomNum(RoomNum, RTypeID)
-	VALUES(@RN, @RTID);
+IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID = 'CEO' OR IncumbencyID = 'CHRO') AND EmpID = @EID)
+		--PRINT 'Access Allowed';
+BEGIN
+	DECLARE @DivName VARCHAR(100)
+	SELECT @DivName = DivName FROM HumanResources.Divisions
+	WHERE DivID = @DivID;
+	DELETE HumanResources.Divisions
+	WHERE DivID = @DivID;
+	PRINT 'Division ' + @DivID + ' [' + @DivName + ']' + ' successfully Deleted'
+END
+
+ELSE IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID != 'CEO' AND IncumbencyID != 'CHRO') AND EmpID = @EID)
+		PRINT 'You [' + CAST(@EID AS VARCHAR(5)) + '] are no Authorized !';
+ELSE
+	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
 GO
+
+--Hint >>  @EID VARCHAR(5), @DivID VARCHAR(10)
+EXEC spDelDiv 'E0007', 'QADIV'
+
+-- Delete Incumbency
+ALTER PROC spDelInc @EID VARCHAR(5), @IncID VARCHAR(10)
+AS
+IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID = 'CHRO' OR IncumbencyID = 'MHRO') AND EmpID = @EID)
+		--PRINT 'Access Allowed';
+BEGIN
+	DECLARE @IncName VARCHAR(100)
+	SELECT @IncName = IncumbencyName FROM HumanResources.Incumbency
+	WHERE IncumbencyID = @IncID;
+	DELETE HumanResources.Incumbency
+	WHERE IncumbencyID = @IncID;
+	PRINT 'Incumbency ' + @IncID + ' [' + @IncName + ']' + ' successfully Deleted'
+END
+
+ELSE IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID != 'CHRO' AND IncumbencyID != 'MHRO') AND EmpID = @EID)
+		PRINT 'You [' + CAST(@EID AS VARCHAR(5)) + '] are no Authorized !';
+ELSE
+	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
+GO
+
+--Hint >>  @EID VARCHAR(5), @IncID VARCHAR(10)
+EXEC spDelInc 'E0007', 'LO'
+
+-- Delete Employee
+CREATE PROC spDelEmp @EID VARCHAR(5), @EmpID VARCHAR(5)
+AS
+IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID = 'MHRO' OR IncumbencyID = 'HRO') AND EmpID = @EID)
+		--PRINT 'Access Allowed';
+BEGIN
+	DECLARE @EmpName VARCHAR(30)
+	SELECT @EmpName = EmpName FROM HumanResources.Employee
+	WHERE EmpID = @EmpID;
+	DELETE HumanResources.Employee
+	WHERE EmpID = @EmpID;
+	PRINT 'Employee ' + @EmpID + ' [' + @EmpName + ']' + ' successfully Deleted'
+END
+
+ELSE IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID != 'MHRO' AND IncumbencyID != 'HRO') AND EmpID = @EID)
+		PRINT 'You [' + CAST(@EID AS VARCHAR(5)) + '] are no Authorized !';
+ELSE
+	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
+GO
+
+--Hint >>  @EID VARCHAR(5), @EmpID VARCHAR(5)
+EXEC spDelEmp 'E0024', 'E0008'
+
+-- Delete RoomType
+CREATE PROC spDelRoomType @EID VARCHAR(5), @RTID VARCHAR(10)
+AS
+IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID = 'COO' OR IncumbencyID = 'MFMO') AND EmpID = @EID)
+		--PRINT 'Access Allowed';
+BEGIN
+	DECLARE @RTN VARCHAR(100)
+	SELECT @RTN = RTypeName FROM Services.RoomType
+	WHERE RTypeID = @RTID;
+	DELETE Services.RoomType
+	WHERE RTypeID = @RTID;
+	PRINT 'Room Type ' + @RTID + ' [' + @RTN + ']' + ' successfully Deleted'
+END
+
+ELSE IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID != 'COO' AND IncumbencyID != 'MFMO') AND EmpID = @EID)
+		PRINT 'You [' + CAST(@EID AS VARCHAR(5)) + '] are no Authorized !';
+ELSE
+	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
+GO
+
+--Hint >>  @EID VARCHAR(5), @RTID VARCHAR(10)
+EXEC spDelRoomType 'E0016', 'R-II'
+
+-- Delete Servant
+ALTER PROC spDelServ @EID VARCHAR(5), @EmpID VARCHAR(5)
+AS
+IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID = 'MFMO' OR IncumbencyID = 'MHRO') AND EmpID = @EID)
+		--PRINT 'Access Allowed';
+BEGIN
+	DECLARE @SN VARCHAR(30), @RTID VARCHAR(10)
+	SELECT @SN = SerName FROM Services.Servant
+	WHERE EmpID = @EmpID;
+	SELECT @RTID = RTypeID FROM Services.Servant
+	WHERE EmpID = @EmpID;
+	DELETE Services.Servant
+	WHERE EmpID = @EmpID;
+	PRINT 'Servant Room Type ' + @RTID + ', ' + @EmpID + ' [' + @SN + ']' + ' successfully Deleted'
+END
+
+ELSE IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID != 'MFMO' AND IncumbencyID != 'MHRO') AND EmpID = @EID)
+		PRINT 'You [' + CAST(@EID AS VARCHAR(5)) + '] are no Authorized !';
+ELSE
+	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
+GO
+
+--Hint >>  @EID VARCHAR(5), @EmpID VARCHAR(5)
+EXEC spDelServ 'E0016', 'E0060'
+
+-- Delete RoomNum
+ALTER PROC spDelRoomNum @EID VARCHAR(5), @RN VARCHAR(5)
+AS
+IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID = 'MFMO' OR IncumbencyID = 'FMO') AND EmpID = @EID)
+		--PRINT 'Access Allowed';
+BEGIN
+	DECLARE @RTID VARCHAR(10)
+	SELECT @RTID = RTypeID FROM Services.RoomNum
+	WHERE RoomNum = @RN;
+	DELETE Services.RoomNum
+	WHERE RoomNum = @RN;
+	PRINT 'Room Num ' + @RN + ' [Room Type ' + @RTID + ']' + ' successfully Deleted'
+END
+
+ELSE IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID != 'MFMO' AND IncumbencyID != 'FMO') AND EmpID = @EID)
+		PRINT 'You [' + CAST(@EID AS VARCHAR(5)) + '] are no Authorized !';
+ELSE
+	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
+GO
+
+--Hint >>  @EID VARCHAR(5), @RN VARCHAR(5)
+EXEC spDelRoomNum 'E0016', 'RS302'
+
+
+SELECT * FROM Services.RoomType
+SELECT * FROM Services.RoomNum
+SELECT * FROM Services.Servant
+SELECT * FROM vRoom
+
 
 /*
-DROP TABLE HumanResources.Coba
-CREATE TABLE HumanResources.Coba(
-	ID		INT IDENTITY NOT NULL,
-	DivID	VARCHAR(10) CHECK(DivID NOT LIKE '%[!~`@#$%^&*()_+-={}:<>?\;'',/(0-9)]%') PRIMARY KEY NOT NULL,
-	DivName	VARCHAR(30) NOT NULL,
-	ChiefID VARCHAR(5)
-);
 
-SELECT * FROM HumanResources.Coba
-DROP PROC spInsCoba
-ALTER PROC spInsCoba @DivName VARCHAR(100)
+CREATE PROC spDelDiv @EID VARCHAR(5)
 AS
-INSERT HumanResources.Divisions(DivName)
-	VALUES(@DivName)
 
-DECLARE @Count INT, @DivID VARCHAR(5)
-SELECT @Count = ID FROM HumanResources.Coba
-WHERE DivID = '0'
-SET @DivID = 'D' + CAST(@Count AS VARCHAR(5))
-UPDATE HumanResources.Coba
-SET DivID = @DivID,
-	DivName = @DivName
-WHERE DivID = '0'
+CREATE PROC spDelDiv @EID VARCHAR(5), @DivID VARCHAR(10)
+AS
+IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID = 'CEO' OR IncumbencyID = 'CHRO') AND EmpID = @EID)
+		--PRINT 'Access Allowed';
+BEGIN
+	--
+END
+
+ELSE IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID != 'MFMO' AND IncumbencyID != 'FMO') AND EmpID = @EID)
+		PRINT 'You [' + CAST(@EID AS VARCHAR(5)) + '] are no Authorized !';
+ELSE
+	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
 GO
 
-EXEC spInsDiv 'Chief Finacial Officer'
-EXEC spInsDiv 'Chief Operation Officer'
-EXEC spInsDiv 'Chief Marketing Officer'
-EXEC spInsDiv 'Chief Excecutif Oficer'
+EXEC spDelDiv
+*/
 
-SELECT * FROM HumanResources.Divisions
-
+/*
 TRUNCATE TABLE HumanResources.Divisions
 DBCC CHECKIDENT ('HumanResources.Divisions', RESEED, 1)
 GO
 */
-
-
---- CREATE VIEW
--- Create View Incumbency & Divisions
-CREATE VIEW vIncDiv
-AS
-SELECT I.IncumbencyID, I.IncumbencyName, I.DivID, D.DivName, D.ChiefID
-FROM HumanResources.Incumbency I
-JOIN HumanResources.Divisions D
-ON I.DivID = D.DivID
-
-SELECT * FROM vIncDiv
-
--- Create View Employee
-CREATE VIEW vEmployee
-AS
-SELECT E.EmpID, E.NIK, E.EmpName, E.Gender, E.DateOfBirth, E.Age, E.MaritalStatus, K.Telephone, K.EmaiL, A.Address, A.ZipCode, A.City, A.Province, C.AccountNum, C.AccountName, C.BankName, I.IncumbencyID, I.IncumbencyName, D.DivName, D.ChiefID
-FROM HumanResources.Employee E
-LEFT OUTER JOIN HumanResources.EmpContact K
-ON E.EmpID = K.EmpID
-LEFT OUTER JOIN HumanResources.EmpAddress A
-ON E.EmpID = A.EmpID
-LEFT OUTER JOIN HumanResources.EmpAccount C
-ON E.EmpID = C.EmpID
-LEFT OUTER JOIN HumanResources.Incumbency I
-ON E.IncumbencyID = I.IncumbencyID
-LEFT OUTER JOIN HumanResources.Divisions D
-ON I.DivID = D.DivID
-
-SELECT * FROM vEmployee
-
--- Create View Room
-CREATE VIEW vRoom
-AS
-SELECT N.RoomNum, N.Status, N.RTypeID, T.RTypeName, T.Price, T.RoomAvailable, T.RoomIsUsed
-FROM Services.RoomNum N
-LEFT OUTER JOIN Services.RoomType T
-ON N.RTypeID = T.RTypeID
-
-SELECT * FROM vRoom
-
--- Create View Servant
-CREATE VIEW vServant
-AS
-SELECT T.RTypeID, T.RTypeName, S.SerName, S.EmpID, S.SerContact FROM Services.RoomType T 
-INNER JOIN Services.Servant S
-ON T.RTypeID = S.RTypeID
-
-SELECT * FROM vServant
