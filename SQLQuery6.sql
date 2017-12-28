@@ -107,7 +107,8 @@ CREATE TABLE Users.Customer(
 	CustName		VARCHAR(30) CHECK(CustName NOT LIKE '%[!~`@#$%^&*()_+-={}:<>?\;'',/(0-9)]%') NOT NULL,
 	Gender			VARCHAR(10) CHECK(Gender IN('M', 'F')) NOT NULL,
 	DateOfBirth		DATETIME CHECK(DateOfBirth < DATEADD(YEAR, -20, GETDATE())) NOT NULL,
-	Age				INT CHECK(Age > 0)
+	Age				INT CHECK(Age > 0),
+	Job				VARCHAR(30) CHECK(Job NOT LIKE '%[!~`@#$%^&*()_+-={}:<>?\;'',/(0-9)]%') NOT NULL,
 );
 
 DROP TABLE Users.CustContact
@@ -176,6 +177,31 @@ CREATE TABLE Transactions.Invoice(
 	DueDateRePay	DATETIME DEFAULT DATEADD(MONTH, 1, CONVERT(DATE, GETDATE())) NOT NULL,
 	RePayStatus		INT DEFAULT 0 CHECK(RePayStatus IN(1, 0)) NOT NULL
 );
+
+------------------------------------
+--Vvvvview MainTrans
+CREATE VIEW vMainTrans
+AS
+SELECT M.TransID, H.TransDate, H.TransTime, M.CustID, M.EmpID, M.RoomNum, C.DateOfCheckIn, C.DateOfCheckOut, C.PeriodOfTime, C.TotalCost
+FROM Transactions.MainTrans M
+INNER JOIN Transactions.TransHistory H
+ON M.TransID = H.TransID
+INNER JOIN Transactions.CostRoom C
+ON M.RoomNum = C.RoomNum
+
+SELECT * FROM vMainTrans
+
+--Vvvvview Customer Transaction
+CREATE VIEW vCustTrans
+AS
+SELECT M.TransID, H.TransDate, H.TransTime, U.CustID, U.NIK, U.CustName, U.Gender
+FROM Transactions.MainTrans M
+INNER JOIN Transactions.TransHistory H
+ON M.TransID = H.TransID
+INNER JOIN Users.Customer U
+ON M.CustID = U.CustID
+
+SELECT * FROM vCustTrans
 
 
 
@@ -266,7 +292,7 @@ SELECT * FROM vServant
 -- Create View Customer Biodata
 CREATE VIEW vCustBio
 AS
-SELECT U.CustID, U.NIK, U.CustName, U.Gender, U.DateOfBirth, U.Age, K.Telephone, K.EmaiL, A.Address, A.ZipCode, A.City, C.AccountNum, C.AccountName, C.BankName
+SELECT U.CustID, U.NIK, U.CustName, U.Gender, U.DateOfBirth, U.Age, U.Job, K.Telephone, K.EmaiL, A.Address, A.ZipCode, A.City, C.AccountNum, C.AccountName, C.BankName
 FROM Users.Customer U
 LEFT OUTER JOIN Users.CustContact K
 ON U.CustID = K.CustID
