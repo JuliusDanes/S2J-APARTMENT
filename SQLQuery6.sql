@@ -136,20 +136,28 @@ CREATE TABLE Users.CustAccount(
 );
 
 --Create Table Transactions
+DROP TABLE Transactions.MainTrans
 CREATE TABLE Transactions.MainTrans(	
 	ID				INT IDENTITY NOT NULL,
 	TransID			VARCHAR(5) DEFAULT 0 PRIMARY KEY,	
-	CustID			VARCHAR(5) REFERENCES Users.Customer(CustID),
-	EmpID			VARCHAR(5) REFERENCES HumanResources.Employee(EmpID),
-	RoomNum			VARCHAR(5) REFERENCES Services.RoomNum(RoomNum) UNIQUE NOT NULL,
-	PeriodOfTime	INT CONSTRAINT cPOT CHECK(PeriodOfTime BETWEEN 1 AND 50) NOT NULL,
-	TotalCost		MONEY CONSTRAINT cTot CHECK(TotalCost >= 10000000) NOT NULL
+	CustID			VARCHAR(5) FOREIGN KEY (CustID) REFERENCES Users.Customer(CustID) NOT NULL,
+	EmpID			VARCHAR(5) FOREIGN KEY (EmpID) REFERENCES HumanResources.Employee(EmpID) NOT NULL,
+	RoomNum			VARCHAR(5) FOREIGN KEY (RoomNum) REFERENCES Services.RoomNum(RoomNum) UNIQUE NOT NULL
 );
 
-DROP TABLE Transactions.MainTrans
-CREATE TABLE Transactions.MainTrans(
+CREATE TABLE Transactions.TransHistory(
+	TransID			VARCHAR(5) DEFAULT 0 PRIMARY KEY,
+	TransDate		DATETIME
+	TransTime		TIME
+);
+
+DROP TABLE Transactions.CostRoom
+CREATE TABLE Transactions.CostRoom(
+	RoomNum			VARCHAR(5) REFERENCES Services.RoomNum(RoomNum) PRIMARY KEY NOT NULL,
 	PeriodOfTime	INT CONSTRAINT cPT CHECK(PeriodOfTime BETWEEN 1 AND 50) NOT NULL,
 	TotalCost		MONEY CONSTRAINT cTC CHECK(TotalCost >= 10000000)
+	ChkIN
+	ChkOUT
 );
 
 INSERT Transactions.MainTrans(PeriodOfTime)
@@ -824,7 +832,6 @@ SELECT * FROM vRoom
 
 
 /*
-
 CREATE PROC spDelDiv @EID VARCHAR(5)
 AS
 
