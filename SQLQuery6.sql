@@ -145,6 +145,8 @@ CREATE TABLE Transactions.MainTrans(
 	RoomNum			VARCHAR(5) FOREIGN KEY (RoomNum) REFERENCES Services.RoomNum(RoomNum) UNIQUE NOT NULL
 );
 
+SELECT * FROM Transactions.MainTrans
+
 DROP TABLE Transactions.TransHistory
 CREATE TABLE Transactions.TransHistory(
 	TransID			VARCHAR(5) REFERENCES Transactions.MainTrans(TransID) PRIMARY KEY NOT NULL,
@@ -155,40 +157,31 @@ CREATE TABLE Transactions.TransHistory(
 DROP TABLE Transactions.CostRoom
 CREATE TABLE Transactions.CostRoom(
 	RoomNum			VARCHAR(5) REFERENCES Services.RoomNum(RoomNum) PRIMARY KEY NOT NULL,
-	DateOfCheckIn	DATETIME DEFAULT CONVERT(DATE, GETDATE()) CONSTRAINT cIN CHECK(DateOfCheckIn >= CONVERT(DATE, GETDATE()) AND CONVERT(DATE, GETDATE())) NOT NULL, --VR GETDATE()
+	DateOfCheckIn	DATETIME DEFAULT CONVERT(DATE, GETDATE()) CONSTRAINT cIN CHECK(DateOfCheckIn >= CONVERT(DATE, GETDATE()) 
+					AND DateOfCheckIn <= DATEADD(DAY, 7, CONVERT(DATE, GETDATE()))) NOT NULL, --VR GETDATE()
 	DateOfCheckOut	DATETIME DEFAULT DATEADD(YEAR, 1, CONVERT(DATE, GETDATE())) CONSTRAINT cOUT CHECK(DateOfCheckOut >= DATEADD(YEAR, 1, CONVERT(DATE, GETDATE()))) NOT NULL, --VR GETDATE() YY + 1
 	PeriodOfTime	INT CONSTRAINT cPT CHECK(PeriodOfTime BETWEEN 1 AND 50) NOT NULL,
-	TotalCost		MONEY CONSTRAINT cTC CHECK(TotalCost >= 10000000)
+	TotalCost		MONEY CONSTRAINT cTC CHECK(TotalCost > 0)
 );
 
-SELECT DATEADD(YEAR, -20, GETDATE())
-SELECT DATEADD(MONTH, 1, GETDATE())
-
-SELECT CONVERT(DATE, GETDATE())
-SELECT CONVERT(TIME, GETDATE())
-
-INSERT Transactions.MainTrans(PeriodOfTime)
-VALUES(2)
-
-ALTER PROC spIns @POT INT
-AS
-DECLARE @TC MONEY, @Price MONEY
-SELECT @Price = Price FROM Services.RoomType
-SET @TC = @POT * @Price
-INSERT Transactions.MainTrans
-VALUES(@POT, @TC)
-GO
-
-
-SELECT * FROM Transactions.MainTrans
-
-CREATE TABLE Transactions.Payment(
-	TransID			VARCHAR(5) FOREIGN KEY (TransID) REFERENCES Transactions.Payment(TransID) NOT NULL,
+DROP TABLE Transactions.Invoice
+CREATE TABLE Transactions.Invoice(
+	TransID			VARCHAR(5) FOREIGN KEY (TransID) REFERENCES Transactions.MainTrans(TransID) NOT NULL,
 	AccountNum		VARCHAR(19) REFERENCES Users.CustAccount(AccountNum) PRIMARY KEY NOT NULL,
-	TotalCost		MONEY,
-	DueDate			DATETIME DEFAULT DATEADD(MONTH, 1, CONVERT(DATE, GETDATE())) NOT NULL,
-	Status			INT DEFAULT 0 CHECK(Status IN(1, 0)) NOT NULL
+	TotalInvoice	MONEY CHECK(TotalInvoice > 0) NOT NULL,
+	DP				MONEY CHECK(DP >= 0) NOT NULL,
+	DueDateDP		DATETIME DEFAULT DATEADD(DAY, 1, CONVERT(DATE, GETDATE())) CHECK(DueDateDP = DATEADD(DAY, 1, CONVERT(DATE, GETDATE()))) NOT NULL,	
+	DPStatus		INT DEFAULT 0 CHECK(DPStatus IN(1, 0)) NOT NULL,
+	Repayment		MONEY CHECK(Repayment >= 0) NOT NULL,
+	DueDateRePay	DATETIME DEFAULT DATEADD(MONTH, 1, CONVERT(DATE, GETDATE())) NOT NULL,
+	RePayStatus		INT DEFAULT 0 CHECK(RePayStatus IN(1, 0)) NOT NULL
 );
+
+
+
+
+
+
 
 ALTER TABLE Transactions.Payment
 ALTER COLUMN 		TotalCost		INT;
@@ -208,6 +201,18 @@ GO
 
 SELECT * FROM Transactions.Payment
 
+
+INSERT Transactions.MainTrans(PeriodOfTime)
+VALUES(2)
+
+CREATE PROC spIns @POT INT
+AS
+DECLARE @TC MONEY, @Price MONEY
+SELECT @Price = Price FROM Services.RoomType
+SET @TC = @POT * @Price
+INSERT Transactions.MainTrans
+VALUES(@POT, @TC)
+GO
 
 
 --- CREATE VIEW ---
