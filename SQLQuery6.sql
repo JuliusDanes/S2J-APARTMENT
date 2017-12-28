@@ -200,8 +200,10 @@ IF @EID = 'FOUND' OR @EID = (
 	SELECT EmpID FROM vEmployee
 	WHERE (IncumbencyID = 'CEO' OR IncumbencyID = 'CHRO') AND EmpID = @EID)
 		--PRINT 'Access Allowed';
+BEGIN
 		INSERT HumanResources.Divisions(DivID, DivName, ChiefID)
 			VALUES(@DivID, @DivName, @ChiefID);
+END
 
 ELSE IF @EID = (
 	SELECT EmpID FROM vEmployee
@@ -210,6 +212,8 @@ ELSE IF @EID = (
 ELSE
 	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
 GO
+
+--Hint >> @EID VARCHAR(5), @DivID VARCHAR(10), @DivName VARCHAR(100), @ChiefID VARCHAR(5)
 
 EXEC spInsDiv 'FOUND', 'FOUNDER', 'CO-Founder', NULL
 EXEC spInsDiv 'FOUND', 'DEXEDIV', 'Executive Director', NULL
@@ -231,8 +235,10 @@ IF @EID = 'FOUND' OR @EID = (
 	SELECT EmpID FROM vEmployee
 	WHERE (IncumbencyID = 'CHRO' OR IncumbencyID = 'MHRO') AND EmpID = @EID)
 		--PRINT 'Access Allowed';
-INSERT HumanResources.Incumbency
-	VALUES(@IncID, @IncName, @DivID);
+BEGIN
+		INSERT HumanResources.Incumbency
+			VALUES(@IncID, @IncName, @DivID);
+END
 
 ELSE IF @EID = (
 	SELECT EmpID FROM vEmployee
@@ -241,6 +247,8 @@ ELSE IF @EID = (
 ELSE
 	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
 GO
+
+--Hint >> @EID VARCHAR(5), @IncID VARCHAR(10), @IncName VARCHAR(100), @DivID VARCHAR(10)
 
 EXEC spInsInc 'FOUND', 'FOUNDER', 'CO-Founder', 'FOUNDER'
 EXEC spInsInc 'FOUND', 'CEO', 'Chief Executive Officer', 'DEXEDIV'
@@ -349,7 +357,7 @@ ELSE
 	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
 GO
 
---Hint >>  @NIK BIGINT, @Name VARCHAR(30), @Gender VARCHAR(10), @DOB DATETIME, @MS VARCHAR(10), @Telp BIGINT, @Email VARCHAR(100), @Add VARCHAR(200), @ZC INT, @City VARCHAR(30), @Prov VARCHAR(30), @AccNum VARCHAR(19), @AccName VARCHAR(30), @BName VARCHAR(30), @DivID VARCHAR(10), @Salary MONEY
+--Hint >>  @EID VARCHAR(5), @NIK BIGINT, @Name VARCHAR(30), @Gender VARCHAR(10), @DOB DATETIME, @MS VARCHAR(10), @Telp BIGINT, @Email VARCHAR(100), @Add VARCHAR(200), @ZC INT, @City VARCHAR(30), @Prov VARCHAR(30), @AccNum VARCHAR(19), @AccName VARCHAR(30), @BName VARCHAR(30), @IncID VARCHAR(10), @Salary MONEY
 
 SELECT * FROM HumanResources.Employee
 SELECT * FROM HumanResources.EmpContact
@@ -429,120 +437,137 @@ EXEC spInsEmp 'FOUND', 3175042512990066, 'Jeff Hay', 'F', '1982-12-21', 'S', 038
 
 --Insert Room Type
 SELECT * FROM Services.RoomType
-ALTER PROC spInsRoomType @RTID VARCHAR(10), @RTN VARCHAR(100), @Price MONEY
+ALTER PROC spInsRoomType @EID VARCHAR(5), @RTID VARCHAR(10), @RTN VARCHAR(100), @Price MONEY
 AS
-INSERT Services.RoomType(RTypeID, RTypeName, Price)
-	VALUES(@RTID, @RTN, @Price);
-GO
-
---Hint >> @RTID VARCHAR(10), @RTN VARCHAR(100), @Price MONEY, @RA INT, @RU INT
-
-EXEC spInsRoomType 'R-I', 'Garden Apartement', 160000000
-EXEC spInsRoomType 'R-II', 'Alcove Minimalist', 120000000
-EXEC spInsRoomType 'R-III', 'Convertible', 110000000
-EXEC spInsRoomType 'R-IV', '4Play Room', 150000000
-EXEC spInsRoomType 'R-V', 'Loft Vintage', 130000000
-
---Insert Servant
-SELECT * FROM Services.Servant
-ALTER PROC spInsServ @EmpID VARCHAR(5), @RTID VARCHAR(10), @SC INT
-AS
-DECLARE @SN VARCHAR(30)
-SELECT @SN = EmpName FROM HumanResources.Employee
-WHERE EmpID = @EmpID
-IF @EmpID = (
-	SELECT EmpID FROM HumanResources.Employee
-	WHERE IncumbencyID = 'SVO' AND EmpID = @EmpID)
-		INSERT Services.Servant
-			VALUES(@SN, @EmpID, @RTID, @SC);
-ELSE 
-	PRINT 'He/She is not a SERVANT!';
-GO
-
---Hint >> @EmpID VARCHAR(5), @RTID VARCHAR(10), @SC INT
-
-EXEC spInsServ 'E0056', 'R-I', 911
-EXEC spInsServ 'E0057', 'R-I', 911
-EXEC spInsServ 'E0058', 'R-II', 922
-EXEC spInsServ 'E0059', 'R-II', 922
-EXEC spInsServ 'E0060', 'R-III', 933
-EXEC spInsServ 'E0061', 'R-III', 933
-EXEC spInsServ 'E0062', 'R-IV', 944
-EXEC spInsServ 'E0063', 'R-IV', 944
-EXEC spInsServ 'E0064', 'R-V', 955
-EXEC spInsServ 'E0065', 'R-V', 955
-
---Insert RoomNum
-SELECT * FROM Services.RoomNum
-ALTER PROC spInsRoom @RTID VARCHAR(10), @BD VARCHAR(1), @Qty SMALLINT
-AS
-DECLARE @Count SMALLINT, @Num VARCHAR(2), @TP SMALLINT, @RN VARCHAR(5)
-SET @Count = 1
-SET @TP =
-	CASE @RTID
-		WHEN 'R-I' THEN 1
-		WHEN 'R-II' THEN 2
-		WHEN 'R-III' THEN 3
-		WHEN 'R-IV' THEN 4
-		WHEN 'R-V' THEN 5
-		WHEN 'R-VI' THEN 6
-		WHEN 'R-VII' THEN 7
-		WHEN 'R-VIII' THEN 8
-		WHEN 'R-IX' THEN 9
-		ELSE 00
-	END
-WHILE @Count <= @Qty
-BEGIN
-	SET @Num = 
-		CASE
-			WHEN (@Count < 10) THEN '0'
-			ELSE ''
-		END	
-	SET @Num = CAST(@Num AS VARCHAR(2)) + CAST(@Count AS VARCHAR(2))
-	SET @RN = 'R' + @BD + CAST(@TP AS VARCHAR(1)) + CAST(@Num AS VARCHAR(2)) + @Num
-	INSERT Services.RoomNum(RoomNum, RTypeID)
-	VALUES(@RN, @RTID)
-	SET @Count = CAST(@Count AS INT)
-	SET @Count = @Count + 1;
-END
-GO
-
---Hint >> @RTID VARCHAR(10), @BD VARCHAR(1), @Qty SMALLINT
-
-EXEC spInsRoom 'R-I', 'S', 10
-EXEC spInsRoom 'R-II', 'S', 10
-EXEC spInsRoom 'R-III', 'S', 10
-EXEC spInsRoom 'R-IV', 'S', 10
-EXEC spInsRoom 'R-V', 'S', 10
-EXEC spInsRoom 'R-I', 'J', 10
-EXEC spInsRoom 'R-II', 'J', 10
-EXEC spInsRoom 'R-III', 'J', 10
-EXEC spInsRoom 'R-IV', 'J', 10
-EXEC spInsRoom 'R-V', 'J', 10
-
-SELECT * FROM vIncDiv
-
-ALTER PROC spLogIn @EID VARCHAR(5)
-AS
-IF @EID = 'FOUND' OR @EID = (
+IF @EID = (
 	SELECT EmpID FROM vEmployee
-	WHERE (IncumbencyID = 'CEO' OR IncumbencyID = 'COO' OR IncumbencyID = 'CHRO') AND EmpID = @EID)
-		PRINT 'Access Allowed';
+	WHERE (IncumbencyID = 'COO' OR IncumbencyID = 'MFMO') AND EmpID = @EID)
+		--PRINT 'Access Allowed';
+BEGIN
+		INSERT Services.RoomType(RTypeID, RTypeName, Price)
+			VALUES(@RTID, @RTN, @Price);
+END
+
 ELSE IF @EID = (
 	SELECT EmpID FROM vEmployee
-	WHERE (IncumbencyID != 'CEO' AND IncumbencyID != 'COO' AND IncumbencyID != 'CHRO') AND EmpID = @EID)
+	WHERE (IncumbencyID != 'COO' AND IncumbencyID != 'MFMO') AND EmpID = @EID)
 		PRINT 'You [' + CAST(@EID AS VARCHAR(5)) + '] are no Authorized !';
 ELSE
 	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
 GO
 
-EXEC spLogIn 'FOUND'
+--Hint >> @EID VARCHAR(5), @RTID VARCHAR(10), @RTN VARCHAR(100), @Price MONEY
+
+EXEC spInsRoomType 'E0016', 'R-I', 'Garden Apartement', 160000000
+EXEC spInsRoomType 'E0016', 'R-II', 'Alcove Minimalist', 120000000
+EXEC spInsRoomType 'E0016', 'R-III', 'Convertible', 110000000
+EXEC spInsRoomType 'E0016', 'R-IV', '4Play Room', 150000000
+EXEC spInsRoomType 'E0016', 'R-V', 'Loft Vintage', 130000000
+
+--Insert Servant
+SELECT * FROM Services.Servant
+ALTER PROC spInsServ @EID VARCHAR(5), @EmpID VARCHAR(5), @RTID VARCHAR(10), @SC INT
+AS
+IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID = 'MFMO' OR IncumbencyID = 'MHRO') AND EmpID = @EID)
+		--PRINT 'Access Allowed';
+BEGIN
+		DECLARE @SN VARCHAR(30)
+		SELECT @SN = EmpName FROM HumanResources.Employee
+		WHERE EmpID = @EmpID
+		IF @EmpID = (
+			SELECT EmpID FROM HumanResources.Employee
+			WHERE IncumbencyID = 'SVO' AND EmpID = @EmpID)
+				INSERT Services.Servant
+					VALUES(@SN, @EmpID, @RTID, @SC);
+		ELSE 
+			PRINT 'He/She is not a SERVANT!';
+END
+
+ELSE IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID != 'MFMO' AND IncumbencyID != 'MHRO') AND EmpID = @EID)
+		PRINT 'You [' + CAST(@EID AS VARCHAR(5)) + '] are no Authorized !';
+ELSE
+	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
+GO
+
+--Hint >> @EID VARCHAR(5), @EmpID VARCHAR(5), @RTID VARCHAR(10), @SC INT
+
+EXEC spInsServ 'E0016', 'E0056', 'R-I', 911
+EXEC spInsServ 'E0016', 'E0057', 'R-I', 911
+EXEC spInsServ 'E0016', 'E0058', 'R-II', 922
+EXEC spInsServ 'E0016', 'E0059', 'R-II', 922
+EXEC spInsServ 'E0016', 'E0060', 'R-III', 933
+EXEC spInsServ 'E0016', 'E0061', 'R-III', 933
+EXEC spInsServ 'E0016', 'E0062', 'R-IV', 944
+EXEC spInsServ 'E0016', 'E0063', 'R-IV', 944
+EXEC spInsServ 'E0016', 'E0064', 'R-V', 955
+EXEC spInsServ 'E0016', 'E0065', 'R-V', 955
+
+--Insert RoomNum
+SELECT * FROM Services.RoomNum
+CREATE PROC spInsRoom @EID VARCHAR(5), @RTID VARCHAR(10), @BD VARCHAR(1), @Qty SMALLINT
+AS
+IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID = 'MFMO' OR IncumbencyID = 'FMO') AND EmpID = @EID)
+		--PRINT 'Access Allowed';
+BEGIN
+		DECLARE @Count SMALLINT, @Num VARCHAR(2), @TP SMALLINT, @RN VARCHAR(5)
+		SET @Count = 1
+		SET @TP =
+			CASE @RTID
+				WHEN 'R-I' THEN 1
+				WHEN 'R-II' THEN 2
+				WHEN 'R-III' THEN 3
+				WHEN 'R-IV' THEN 4
+				WHEN 'R-V' THEN 5
+				WHEN 'R-VI' THEN 6
+				WHEN 'R-VII' THEN 7
+				WHEN 'R-VIII' THEN 8
+				WHEN 'R-IX' THEN 9
+				ELSE 00
+			END
+		WHILE @Count <= @Qty
+		BEGIN
+			SET @Num = 
+				CASE
+					WHEN (@Count < 10) THEN '0'
+					ELSE ''
+				END	
+			SET @Num = CAST(@Num AS VARCHAR(2)) + CAST(@Count AS VARCHAR(2))
+			SET @RN = 'R' + @BD + CAST(@TP AS VARCHAR(1)) + CAST(@Num AS VARCHAR(2)) + @Num
+			INSERT Services.RoomNum(RoomNum, RTypeID)
+			VALUES(@RN, @RTID)
+			SET @Count = CAST(@Count AS INT)
+			SET @Count = @Count + 1;
+		END
+END
+
+ELSE IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID != 'MFMO' AND IncumbencyID != 'FMO') AND EmpID = @EID)
+		PRINT 'You [' + CAST(@EID AS VARCHAR(5)) + '] are no Authorized !';
+ELSE
+	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
+GO
+
+--Hint >> @EID VARCHAR(5), @RTID VARCHAR(10), @BD VARCHAR(1), @Qty SMALLINT
+
+EXEC spInsRoom 'E0016', 'R-I', 'S', 10
+EXEC spInsRoom 'E0016', 'R-II', 'S', 10
+EXEC spInsRoom 'E0016', 'R-III', 'S', 10
+EXEC spInsRoom 'E0016', 'R-IV', 'S', 10
+EXEC spInsRoom 'E0016', 'R-V', 'S', 10
+EXEC spInsRoom 'E0016', 'R-I', 'J', 10
+EXEC spInsRoom 'E0016', 'R-II', 'J', 10
+EXEC spInsRoom 'E0016', 'R-III', 'J', 10
+EXEC spInsRoom 'E0016', 'R-IV', 'J', 10
+EXEC spInsRoom 'E0016', 'R-V', 'J', 10
 
 
-SELECT * FROM HumanResources.Incumbency
-UPDATE HumanResources.Incumbency
-SET IncumbencyName = 'Chief Operating Officer'
-WHERE IncumbencyID = 'COO';
 
 
 --ALTER PROC spInsRoom @RN VARCHAR(5), @RTID VARCHAR(10)
