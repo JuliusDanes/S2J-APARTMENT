@@ -189,6 +189,8 @@ GO
 
 SELECT * FROM Transactions.Payment
 
+
+
 --- CREATE VIEW ---
 -- Create View Incumbency & Divisions
 CREATE VIEW vIncDiv
@@ -244,7 +246,7 @@ SELECT * FROM vServant
 --- INSERT TABLE ---
 --Insert Divisions
 SELECT * FROM HumanResources.Divisions
-ALTER PROC spInsDiv @EID VARCHAR(5), @DivID VARCHAR(10), @DivName VARCHAR(100), @ChiefID VARCHAR(5)
+CREATE PROC spInsDiv @EID VARCHAR(5), @DivID VARCHAR(10), @DivName VARCHAR(100), @ChiefID VARCHAR(5)
 AS
 IF @EID = 'FOUND' OR @EID = (
 	SELECT EmpID FROM vEmployee
@@ -253,6 +255,7 @@ IF @EID = 'FOUND' OR @EID = (
 BEGIN
 		INSERT HumanResources.Divisions(DivID, DivName, ChiefID)
 			VALUES(@DivID, @DivName, @ChiefID);
+		PRINT 'Division ' + @DivID + ' [' + @DivName + ']' + ' successfully Added +'
 END
 
 ELSE IF @EID = (
@@ -278,7 +281,7 @@ EXEC spInsDiv 'FOUND', 'QADIV', 'Quality Assurance', 'E0011'
 
 --Insert Incumbency
 SELECT * FROM HumanResources.Incumbency
-ALTER PROC spInsInc @EID VARCHAR(5), @IncID VARCHAR(10), @IncName VARCHAR(100), @DivID VARCHAR(10)
+CREATE PROC spInsInc @EID VARCHAR(5), @IncID VARCHAR(10), @IncName VARCHAR(100), @DivID VARCHAR(10)
 AS
 IF @EID = 'FOUND' OR @EID = (
 	SELECT EmpID FROM vEmployee
@@ -287,6 +290,7 @@ IF @EID = 'FOUND' OR @EID = (
 BEGIN
 		INSERT HumanResources.Incumbency
 			VALUES(@IncID, @IncName, @DivID);
+		PRINT 'Incumbency ' + @IncID + ' [' + @IncName + ']' + ' successfully Added +'
 END
 
 ELSE IF @EID = (
@@ -355,7 +359,7 @@ SELECT * FROM HumanResources.EmpAddress
 SELECT * FROM HumanResources.EmpAccount
 
 DROP PROC spInsEmp
-ALTER PROC spInsEmp @EID VARCHAR(5), @NIK BIGINT, @Name VARCHAR(30), @Gender VARCHAR(10), @DOB DATETIME, @MS VARCHAR(10), @Telp BIGINT, @Email VARCHAR(100), @Add VARCHAR(200), @ZC INT, @City VARCHAR(30), @Prov VARCHAR(30), @AccNum VARCHAR(19), @AccName VARCHAR(30), @BName VARCHAR(30), @IncID VARCHAR(10), @Salary MONEY
+CREATE PROC spInsEmp @EID VARCHAR(5), @NIK BIGINT, @Name VARCHAR(30), @Gender VARCHAR(10), @DOB DATETIME, @MS VARCHAR(10), @Telp BIGINT, @Email VARCHAR(100), @Add VARCHAR(200), @ZC INT, @City VARCHAR(30), @Prov VARCHAR(30), @AccNum VARCHAR(19), @AccName VARCHAR(30), @BName VARCHAR(30), @IncID VARCHAR(10), @Salary MONEY
 AS
 IF @EID = 'FOUND' OR @EID = (
 	SELECT EmpID FROM vEmployee
@@ -397,6 +401,7 @@ BEGIN
 			VALUES(@EmpID, @Add, @ZC, @City, @Prov);
 		INSERT HumanResources.EmpAccount
 			VALUES(@EmpID, @AccNum, @AccName, @BName);
+		PRINT 'Employee ' + @EmpID + ' [' + @Name + ']' + ' successfully Added +'
 END
 ELSE IF @EID = (
 	SELECT EmpID FROM vEmployee
@@ -412,7 +417,6 @@ SELECT * FROM HumanResources.Employee
 SELECT * FROM HumanResources.EmpContact
 SELECT * FROM HumanResources.EmpAddress
 SELECT * FROM HumanResources.EmpAccount
-TRUNCATE TABLE HumanResources.Employee
 
 EXEC spInsEmp 'FOUND', 3175042512990006, 'Shafira Az"zahra', 'F', '1990-01-02', 'M', 085284843201, 'shafira.azzahra@yahoo.com', 'Jl Raya Bogor No 78', 13510, 'Jakarta', 'DKI Jakarta', '1234-5678-1234-5678', 'Shafira Azzahra', 'Bukopin', 'FOUNDER', NULL
 EXEC spInsEmp 'FOUND', 3175042512990001, 'Julius Danes Nugroho', 'M', '1990-12-25', 'M', 085284843202, 'julius.danes.nugroho@gmail.com', 'Jl. Bangun Raya No 23', 13550, 'Jakarta', 'DKI Jakarta', '1234-5678-8765-4321', 'Julius Danes', 'Bukopin', 'FOUNDER', NULL
@@ -487,7 +491,7 @@ EXEC spInsEmp 'FOUND', 3175042512990066, 'Jeff Hay', 'F', '1982-12-21', 'S', 038
 
 --Insert Room Type
 SELECT * FROM Services.RoomType
-ALTER PROC spInsRoomType @EID VARCHAR(5), @RTID VARCHAR(10), @RTN VARCHAR(100), @Price MONEY
+CREATE PROC spInsRoomType @EID VARCHAR(5), @RTID VARCHAR(10), @RTN VARCHAR(100), @Price MONEY
 AS
 IF @EID = (
 	SELECT EmpID FROM vEmployee
@@ -496,6 +500,7 @@ IF @EID = (
 BEGIN
 		INSERT Services.RoomType(RTypeID, RTypeName, Price)
 			VALUES(@RTID, @RTN, @Price);
+		PRINT 'Room Type ' + @RTID + ' [' + @RTN + ']' + ' successfully Added +'
 END
 
 ELSE IF @EID = (
@@ -516,7 +521,7 @@ EXEC spInsRoomType 'E0016', 'R-V', 'Loft Vintage', 130000000
 
 --Insert Servant
 SELECT * FROM Services.Servant
-ALTER PROC spInsServ @EID VARCHAR(5), @EmpID VARCHAR(5), @RTID VARCHAR(10), @SC INT
+CREATE PROC spInsServ @EID VARCHAR(5), @EmpID VARCHAR(5), @RTID VARCHAR(10), @SC INT
 AS
 IF @EID = (
 	SELECT EmpID FROM vEmployee
@@ -529,8 +534,11 @@ BEGIN
 		IF @EmpID = (
 			SELECT EmpID FROM HumanResources.Employee
 			WHERE IncumbencyID = 'SVO' AND EmpID = @EmpID)
+				BEGIN
 				INSERT Services.Servant
-					VALUES(@SN, @EmpID, @RTID, @SC);
+					VALUES(@SN, @EmpID, @RTID, @SC);				
+				PRINT 'Servant Room Type ' + @RTID + ', ' + @EmpID + ' [' + @SN + ']' + ' successfully Added +'
+				END
 		ELSE 
 			PRINT 'He/She is not a SERVANT!';
 END
@@ -592,7 +600,8 @@ BEGIN
 			INSERT Services.RoomNum(RoomNum, RTypeID)
 			VALUES(@RN, @RTID)
 			SET @Count = CAST(@Count AS INT)
-			SET @Count = @Count + 1;
+			SET @Count = @Count + 1;			
+			PRINT 'Room Num ' + @RN + ' [Room Type ' + @RTID + ']' + ' successfully Added +'
 		END
 END
 
@@ -632,7 +641,7 @@ BEGIN
 	WHERE DivID = @DivID;
 	DELETE HumanResources.Divisions
 	WHERE DivID = @DivID;
-	PRINT 'Division ' + @DivID + ' [' + @DivName + ']' + ' successfully Deleted'
+	PRINT 'Division ' + @DivID + ' [' + @DivName + ']' + ' successfully Deleted -'
 END
 
 ELSE IF @EID = (
@@ -647,7 +656,7 @@ GO
 EXEC spDelDiv 'E0007', 'QADIV'
 
 -- Delete Incumbency
-ALTER PROC spDelInc @EID VARCHAR(5), @IncID VARCHAR(10)
+CREATE PROC spDelInc @EID VARCHAR(5), @IncID VARCHAR(10)
 AS
 IF @EID = (
 	SELECT EmpID FROM vEmployee
@@ -659,7 +668,7 @@ BEGIN
 	WHERE IncumbencyID = @IncID;
 	DELETE HumanResources.Incumbency
 	WHERE IncumbencyID = @IncID;
-	PRINT 'Incumbency ' + @IncID + ' [' + @IncName + ']' + ' successfully Deleted'
+	PRINT 'Incumbency ' + @IncID + ' [' + @IncName + ']' + ' successfully Deleted -'
 END
 
 ELSE IF @EID = (
@@ -686,7 +695,7 @@ BEGIN
 	WHERE EmpID = @EmpID;
 	DELETE HumanResources.Employee
 	WHERE EmpID = @EmpID;
-	PRINT 'Employee ' + @EmpID + ' [' + @EmpName + ']' + ' successfully Deleted'
+	PRINT 'Employee ' + @EmpID + ' [' + @EmpName + ']' + ' successfully Deleted -'
 END
 
 ELSE IF @EID = (
@@ -713,7 +722,7 @@ BEGIN
 	WHERE RTypeID = @RTID;
 	DELETE Services.RoomType
 	WHERE RTypeID = @RTID;
-	PRINT 'Room Type ' + @RTID + ' [' + @RTN + ']' + ' successfully Deleted'
+	PRINT 'Room Type ' + @RTID + ' [' + @RTN + ']' + ' successfully Deleted -'
 END
 
 ELSE IF @EID = (
@@ -728,7 +737,7 @@ GO
 EXEC spDelRoomType 'E0016', 'R-II'
 
 -- Delete Servant
-ALTER PROC spDelServ @EID VARCHAR(5), @EmpID VARCHAR(5)
+CREATE PROC spDelServ @EID VARCHAR(5), @EmpID VARCHAR(5)
 AS
 IF @EID = (
 	SELECT EmpID FROM vEmployee
@@ -742,7 +751,7 @@ BEGIN
 	WHERE EmpID = @EmpID;
 	DELETE Services.Servant
 	WHERE EmpID = @EmpID;
-	PRINT 'Servant Room Type ' + @RTID + ', ' + @EmpID + ' [' + @SN + ']' + ' successfully Deleted'
+	PRINT 'Servant Room Type ' + @RTID + ', ' + @EmpID + ' [' + @SN + ']' + ' successfully Deleted -'
 END
 
 ELSE IF @EID = (
@@ -757,7 +766,7 @@ GO
 EXEC spDelServ 'E0016', 'E0060'
 
 -- Delete RoomNum
-ALTER PROC spDelRoomNum @EID VARCHAR(5), @RN VARCHAR(5)
+CREATE PROC spDelRoomNum @EID VARCHAR(5), @RN VARCHAR(5)
 AS
 IF @EID = (
 	SELECT EmpID FROM vEmployee
@@ -769,7 +778,7 @@ BEGIN
 	WHERE RoomNum = @RN;
 	DELETE Services.RoomNum
 	WHERE RoomNum = @RN;
-	PRINT 'Room Num ' + @RN + ' [Room Type ' + @RTID + ']' + ' successfully Deleted'
+	PRINT 'Room Num ' + @RN + ' [Room Type ' + @RTID + ']' + ' successfully Deleted -'
 END
 
 ELSE IF @EID = (
