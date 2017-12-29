@@ -174,8 +174,11 @@ CREATE TABLE Transactions.Invoice(
 	DueDateDP		DATETIME DEFAULT DATEADD(DAY, 1, CONVERT(DATE, GETDATE())) CHECK(DueDateDP = DATEADD(DAY, 1, CONVERT(DATE, GETDATE()))) NOT NULL,	
 	DPStatus		INT DEFAULT 0 CHECK(DPStatus IN(1, 0)) NOT NULL,
 	Repayment		MONEY CHECK(Repayment >= 0) NOT NULL,
-	DueDateRePay	DATETIME DEFAULT DATEADD(DAY, 1, CONVERT(DATE, GETDATE())) NOT NULL,
-	RePayStatus		INT DEFAULT 0 CHECK(RePayStatus IN(1, 0)) NOT NULL
+	DueDateRePay	DATETIME DEFAULT CONVERT(DATE, GETDATE()) CHECK(DueDateRePay >= CONVERT(DATE, GETDATE()) 
+					AND DueDateRePay <= DATEADD(DAY, 7, CONVERT(DATE, GETDATE()))) NOT NULL,
+	RePayStatus		INT DEFAULT 0 CHECK(RePayStatus IN(1, 0)) NOT NULL,
+	AlreadyPaid		MONEY DEFAULT 0 CHECK(AlreadyPaid >= 0) NOT NULL,
+	Unpaid			MONEY CHECK(Unpaid >= 0) NOT NULL,
 );
 
 ------------------------------------
@@ -205,7 +208,7 @@ SELECT * FROM vCustTrans
 
 
 --Insert Transactions
-CREATE PROC spInsTrans @EID VARCHAR(5), @RN VARCHAR(5), @POT INT, @DCIN DATETIME, @NIK BIGINT, @Name VARCHAR(30), @Gender VARCHAR(10), @DOB DATETIME, @Job VARCHAR(30), @Telp BIGINT, @Email VARCHAR(100), @Add VARCHAR(200), @ZC INT, @City VARCHAR(30), @Prov VARCHAR(30), @AccNum VARCHAR(19), @AccName VARCHAR(30), @BName VARCHAR(30)
+CREATE PROC spInsTrans @EID VARCHAR(5), @RN VARCHAR(5), @POT INT, @DCIN DATETIME, @AP MONEY, @NIK BIGINT, @Name VARCHAR(30), @Gender VARCHAR(10), @DOB DATETIME, @Job VARCHAR(30), @Telp BIGINT, @Email VARCHAR(100), @Add VARCHAR(200), @ZC INT, @City VARCHAR(30), @Prov VARCHAR(30), @AccNum VARCHAR(19), @AccName VARCHAR(30), @BName VARCHAR(30)
 AS
 IF @EID = (
 	SELECT EmpID FROM vEmployee
@@ -213,7 +216,7 @@ IF @EID = (
 		--PRINT 'Access Allowed';
 BEGIN
 		--<Batch Trans
-		DECLARE @CountT INT, @TransID VARCHAR(5), @DCOUT DATETIME, @TC MONEY, @Price MONEY, @DP MONEY, @RP MONEY
+		DECLARE @CountT INT, @TransID VARCHAR(5), @DCOUT DATETIME, @TC MONEY, @Price MONEY, @DP MONEY, @RP MONEY, @UP MONEY
 		SELECT @CountT = ID FROM Transactions.MainTrans
 		WHERE @TransID = '0'
 		SET @TransID = (
@@ -238,7 +241,7 @@ BEGIN
 
 		SET @DP = @TC * 0.1  --DP = 10% Total Cost
 		SET @RP = @TC * 0.9  --Repayment = 90% Total Cost
-
+		SET @UP	= @TC - @AP  --Check Transfer
 		--?>
 		
 		--<Batch Cust
@@ -271,8 +274,8 @@ BEGIN
 		INSERT Transactions.CostRoom(RoomNum, PeriodOfTime, DateOfCheckIn, DateOfCheckOut, TotalCost)
 			VALUES(@RN, @POT, @DCIN, @DCOUT, @TC);
 
-		INSERT Transactions.Invoice(TransID, AccountNum, TotalInvoice, DP, Repayment, DueDateRePay)
-			VALUES(@TransID, @AccNum, @TC, @DP, @RP, @DCIN);
+		INSERT Transactions.Invoice(TransID, AccountNum, TotalInvoice, DP, Repayment, DueDateRePay, AlreadyPaid, Unpaid)
+			VALUES(@TransID, @AccNum, @TC, @DP, @RP, @DCIN, @AP, @UP);
 
 		INSERT Users.Customer(NIK, CustName, Gender, DateOfBirth, Job)
 			VALUES(@NIK, @Name, @Gender, @DOB, @Job);
