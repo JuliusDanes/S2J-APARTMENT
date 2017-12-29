@@ -775,9 +775,26 @@ GO
 --Hint >> @EID VARCHAR(5), @RN VARCHAR(5), @POT INT, @DCIN DATETIME, @AP MONEY, @NIK BIGINT, @Name VARCHAR(30), @Gender VARCHAR(10), @DOB DATETIME, @Job VARCHAR(30),
 --			 @Telp BIGINT, @Email VARCHAR(100), @Add VARCHAR(200), @ZC INT, @City VARCHAR(30), @Prov VARCHAR(30), @AccNum VARCHAR(19), @AccName VARCHAR(30), @BName VARCHAR(30)
 
-EXEC spInsTrans 'E0031', 'RS203', 1, '2017-12-30', 0, '3175041708450001', 'Johanes Chandra', 'M', '1990-08-17', 'Entrepreneurship', 
+EXEC spInsTrans 'E0031', 'RS102', 1, '2017-12-30', 0, '3175041708450001', 'Johanes Chandra', 'M', '1990-08-17', 'Entrepreneur', 
 					085214149801, 'johanes.chandra@geevv.com', 'Jl Jendral Sudirman No 10', 14045, 'Padang', 'Sumatra Barat', '1650-1780-1605-2018', 'Johanes Chandra', 'BCA'
-
+EXEC spInsTrans 'E0031', 'RS203', 2, '2018-01-05', 0, '3175041708450002', 'Diaz Rivaldo', 'M', '1988-05-16', 'Employee', 
+					082929192012, 'diaz.rivaldo@geevv.com', 'Jl Manggis Raya No 6', 14022, 'Sentolo', 'Yogyakarta', '7829-2839-1042-1040', 'Diaz Rivaldo', 'BRI'
+EXEC spInsTrans 'E0031', 'RS304', 3, '2018-01-04', 0, '3175041708450003', 'Sabrina Anisa', 'F', '1995-12-25', 'Doctor', 
+					087829289292, 'sabrina.anisa@geevv.com', 'Jl Jendral Sudirman No 10', 50505, 'Manado', 'Sulawesi Utara', '1728-1718-1931-4921', 'Sabrina Anisa', 'BNI'
+EXEC spInsTrans 'E0031', 'RS405', 4, '2018-01-03', 0, '3175041708450004', 'Kevin Kautsar', 'M', '1986-04-21', 'Actor', 
+					088382948582, 'kevin.kautsar@geevv.com', 'Jl Jaksa Agung Suprapto No 1', 91100, 'Jakarta', 'DKI Jakarta', '2719-2819-1921-1912', 'Kevin Kautsar', 'MEGA'
+EXEC spInsTrans 'E0031', 'RS501', 5, '2018-01-02', 0, '3175041708450005', 'Adni Alydrus', 'F', '1980-12-22', 'Lecturer', 
+					085592948393, 'adni.alydrus@geevv.com', 'Jl Condet Raya No 6', 11200, 'Bandung', 'Jawa Barat', '2910-1936-2919-3242', 'Adni Alydrus', 'BTN'
+EXEC spInsTrans 'E0031', 'RJ110', 1, '2018-01-01', 0, '3175041708450006', 'Faisal Rahman', 'M', '1984-01-03', 'Teacher', 
+					088284929293, 'faisal.rahman@contoso.com', 'Jl Juanda No 7', 12345, 'Medan', 'Sumatra Utara', '2371-6321-6235-2562', 'Faisal Rahman', 'CIMB'
+EXEC spInsTrans 'E0031', 'RJ209', 6, '2017-12-31', 0, '3175041708450007', 'Bunga Sartika', 'F', '1987-09-02', 'Trader', 
+					088305949394, 'bunga.sartika@harvard.edu', 'Jl Walkstreet No 10', 67890, 'Surabaya', 'Jawa Timur', '4577-5413-4332-7542', 'Bunga Sartika', 'Mandiri'
+EXEC spInsTrans 'E0031', 'RJ308', 5, '2018-01-05', 0, '3175041708450008', 'Iqbal Nugroho', 'M', '1976-09-11', 'Scientist', 
+					084894930390, 'iqbal.nugroho@farma.biz', 'Jl Raya Bogor No 78', 16058, 'Jakarta', 'DKI Jakarta', '1035-2246-6442-4363', 'Iqbal Nugroho', 'Bank DKI'
+EXEC spInsTrans 'E0031', 'RJ407', 1, '2018-01-04', 0, '3175041708450009', 'Farhan Ramadhan', 'M', '1990-12-21', 'Police', 
+					088493090203, 'farhan.ramadhan@eng.ui.ac.id ', 'Jl Djoko Anwar', 16518, 'Flores', 'Nusa Tenggara Timur', '3813-7268-2819-1391', 'Farhan Ramadhan', 'BJB'
+EXEC spInsTrans 'E0031', 'RJ506', 7, '2018-01-03', 0, '3175041708450010', 'Trisya Talia', 'F', '1985-12-12', 'Lawyer', 
+					083983893938, 'trisya.talia@yooho.co.id', 'Jl Gelora Bung Karno', 17818, 'Pontianak', 'Kalimantan Barat', '5229-1361-5321-4212', 'Trisya Talia', 'Bukopin'
 
 
 
