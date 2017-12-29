@@ -141,21 +141,21 @@ DROP TABLE Transactions.MainTrans
 CREATE TABLE Transactions.MainTrans(	
 	ID				INT IDENTITY NOT NULL,
 	TransID			VARCHAR(5) DEFAULT 0 PRIMARY KEY,	
-	CustID			VARCHAR(5) FOREIGN KEY (CustID) REFERENCES Users.Customer(CustID) NOT NULL,
-	EmpID			VARCHAR(5) FOREIGN KEY (EmpID) REFERENCES HumanResources.Employee(EmpID) NOT NULL,
-	RoomNum			VARCHAR(5) FOREIGN KEY (RoomNum) REFERENCES Services.RoomNum(RoomNum) UNIQUE NOT NULL
+	CustID			VARCHAR(5) FOREIGN KEY (CustID) REFERENCES Users.Customer(CustID) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL,
+	EmpID			VARCHAR(5) FOREIGN KEY (EmpID) REFERENCES HumanResources.Employee(EmpID) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL,
+	RoomNum			VARCHAR(5) FOREIGN KEY (RoomNum) REFERENCES Services.RoomNum(RoomNum) ON DELETE CASCADE ON UPDATE CASCADE UNIQUE NOT NULL
 );
 
 DROP TABLE Transactions.TransHistory
 CREATE TABLE Transactions.TransHistory(
-	TransID			VARCHAR(5) REFERENCES Transactions.MainTrans(TransID) PRIMARY KEY NOT NULL,
+	TransID			VARCHAR(5) REFERENCES Transactions.MainTrans(TransID) ON DELETE CASCADE ON UPDATE CASCADE PRIMARY KEY NOT NULL,
 	TransDate		DATETIME DEFAULT CONVERT(DATE, GETDATE()) NOT NULL,
 	TransTime		DATETIME DEFAULT CONVERT(TIME, GETDATE()) UNIQUE NOT NULL,
 );
 
 DROP TABLE Transactions.CostRoom
 CREATE TABLE Transactions.CostRoom(
-	RoomNum			VARCHAR(5) REFERENCES Services.RoomNum(RoomNum) PRIMARY KEY NOT NULL,
+	RoomNum			VARCHAR(5) REFERENCES Services.RoomNum(RoomNum) ON DELETE CASCADE ON UPDATE CASCADE PRIMARY KEY NOT NULL,
 	PeriodOfTime	INT CONSTRAINT cPT CHECK(PeriodOfTime BETWEEN 1 AND 50) NOT NULL,
 	DateOfCheckIn	DATETIME DEFAULT CONVERT(DATE, GETDATE()) CONSTRAINT cIN CHECK(DateOfCheckIn >= CONVERT(DATE, GETDATE()) 
 					AND DateOfCheckIn <= DATEADD(DAY, 7, CONVERT(DATE, GETDATE()))) NOT NULL, --VR GETDATE()
@@ -165,7 +165,7 @@ CREATE TABLE Transactions.CostRoom(
 
 DROP TABLE Transactions.Invoice
 CREATE TABLE Transactions.Invoice(
-	TransID			VARCHAR(5) FOREIGN KEY (TransID) REFERENCES Transactions.MainTrans(TransID) NOT NULL,
+	TransID			VARCHAR(5) FOREIGN KEY (TransID) REFERENCES Transactions.MainTrans(TransID) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL,
 	AccountNum		VARCHAR(19) FOREIGN KEY (AccountNum) REFERENCES Users.CustAccount(AccountNum) NOT NULL,
 	TotalInvoice	MONEY CHECK(TotalInvoice >= 0),
 	DP				MONEY CHECK(DP >= 0),
@@ -971,9 +971,51 @@ GO
 --Hint >>  @EID VARCHAR(5), @RN VARCHAR(5)
 EXEC spDelRoomNum 'E0016', 'RS302'
 
+-- Delete Transactions
+SELECT * FROM vMainTrans
+SELECT * FROM vCustTrans
+SELECT * FROM vCustBio
+SELECT * FROM Transactions.Invoice
 
+CREATE PROC spDelTrans @EID VARCHAR(5), @TransID VARCHAR(5)
+AS
+IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID = 'MCSO' OR IncumbencyID = 'CSO') AND EmpID = @EID)
+		--PRINT 'Access Allowed';
+BEGIN
+	DECLARE @CustID VARCHAR(5), @Name VARCHAR(30), @RN VARCHAR(5)
+	SELECT @CustID = CustID FROM Users.Customer
+	WHERE CustID = (
+						SELECT CustID FROM Transactions.MainTrans
+						WHERE TransID = @TransID
+					);
+	SELECT @Name = CustName FROM Users.Customer
+	WHERE CustName = (
+						SELECT CustID FROM Transactions.MainTrans
+						WHERE TransID = @TransID
+					);
+	SELECT @RN = RoomNum FROM Services.RoomNum
+	WHERE RoomNum = (
+						SELECT RoomNum FROM Transactions.MainTrans
+						WHERE TransID = @TransID
+					);
+	DELETE Transactions.MainTrans
+	WHERE TransID = @TransID;	
+	PRINT 'Transaction ' + @TransID + ' for booking room number ' + @RN + ' with user id ' + @CustID + ' [' + @Name + ']' + ' successfully Deleted -'
+END
 
+ELSE IF @EID = (
+	SELECT EmpID FROM vEmployee
+	WHERE (IncumbencyID != 'MCSO' AND IncumbencyID != 'CSO') AND EmpID = @EID)
+		PRINT 'You [' + CAST(@EID AS VARCHAR(5)) + '] are no Authorized !';
+ELSE
+	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
+GO
 
+EXEC spDelTrans 'E0030', 'T0009'
+
+SELECT * FROM vMainTrans
 
 
 /*
