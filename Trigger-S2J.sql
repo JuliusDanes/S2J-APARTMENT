@@ -43,7 +43,41 @@ FOR DELETE AS
 	WHERE TransID = (SELECT TransID FROM DELETED)
 GO
 
-
+-- Trigger Update Invoice
+CREATE TRIGGER trgUpInvoice
+ON Transactions.Invoice
+FOR UPDATE AS
+	DECLARE @TransID VARCHAR(5), @DPS VARCHAR(10), @RPS VARCHAR(10)	
+	SELECT @TransID = TransID FROM INSERTED
+	SELECT @DPS = DPStatus FROM INSERTED
+	SELECT @RPS = RePayStatus FROM INSERTED
+	IF @DPS = 'Paid'	
+		BEGIN
+			UPDATE Transactions.TransHistory
+			SET Status = 'Waiting (Payment of Repayment)'
+			WHERE TransID = @TransID
+			PRINT 'Payment transaction of down payment is successful.'; 
+			IF @RPS = 'Paid'
+				BEGIN					
+					UPDATE Transactions.TransHistory
+					SET Status = 'Succeed (Paid Off)'					
+					WHERE TransID = @TransID					
+					PRINT 'Payment transaction of repayment is successful.'
+				END
+			ELSE 
+				BEGIN 						
+					UPDATE Transactions.TransHistory
+					SET Status = 'Waiting (Payment of Repayment)'			
+					WHERE TransID = @TransID
+				END	
+		END
+	ELSE
+		BEGIN					
+			UPDATE Transactions.TransHistory
+			SET Status = 'Waiting (Payment of Down Payment)'			
+			WHERE TransID = @TransID			
+		END
+GO
 
 
 SP_HELP 'Transactions.MainTrans'						

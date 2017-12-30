@@ -43,7 +43,7 @@ CREATE TABLE HumanResources.Employee(
 	NIK				BIGINT CHECK(NIK BETWEEN 1000000000000000 AND 9999999999999999) UNIQUE NOT NULL,
 	EmpName			VARCHAR(30) CHECK(EmpName NOT LIKE '%[!~`@#$%^&*()_+-={}:<>?\;'',/(0-9)]%') UNIQUE NOT NULL,
 	Gender			VARCHAR(10) CHECK(Gender IN('M', 'F')) NOT NULL,
-	DateOfBirth		DATETIME CHECK(DateOfBirth < DATEADD(YEAR, -20, GETDATE())) NOT NULL,
+	DateOfBirth		DATETIME CHECK(DateOfBirth < DATEADD(YEAR, -20, GETDATE()) AND DateOfBirth > DATEADD(YEAR, -56, GETDATE())) NOT NULL,
 	Age				INT CHECK(Age > 0),
 	MaritalStatus	VARCHAR(10) CHECK(MaritalStatus IN('M', 'S', 'Married', 'Single')),
 	IncumbencyID	VARCHAR(10) FOREIGN KEY (IncumbencyID) REFERENCES HumanResources.Incumbency(IncumbencyID) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -154,7 +154,7 @@ CREATE TABLE Transactions.TransHistory(
 	TransID			VARCHAR(5) REFERENCES Transactions.MainTrans(TransID) ON DELETE CASCADE ON UPDATE CASCADE PRIMARY KEY NOT NULL,
 	TransDate		DATETIME DEFAULT CONVERT(DATE, GETDATE()) NOT NULL,
 	TransTime		DATETIME DEFAULT CONVERT(TIME, GETDATE()) UNIQUE NOT NULL,
-	Status			VARCHAR(50) DEFAULT 'Waiting (Payment Down Payment)' CHECK(Status IN ('Cancelled', 'Waiting (Payment Down Payment)', 'Waiting (Payment of Repayment)'))
+	Status			VARCHAR(50) DEFAULT 'Waiting (Payment of Down Payment)' CHECK(Status IN ('Cancelled', 'Waiting (Payment of Down Payment)', 'Waiting (Payment of Repayment)', 'Succeed (Paid Off)'))
 );
 
 DROP TABLE Transactions.CostRoom

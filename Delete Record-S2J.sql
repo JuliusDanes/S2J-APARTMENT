@@ -231,6 +231,8 @@ BEGIN
 	WHERE TransID = @TransID;
 	DELETE Transactions.CostRoom
 	WHERE RoomNum = @RN	
+	DELETE Users.Customer
+	WHERE CustID = @CustID	
 	PRINT 'Transaction ' + @TransID + ' for booking room number ' + @RN + ' with user id ' + @CustID + ' [' + @Name + ']' + ' successfully Deleted -'
 END
 
