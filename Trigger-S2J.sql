@@ -8,7 +8,7 @@ GO
 
 		--- TRIGGER ---
 -- Trigger Insert Transaction
-CREATE TRIGGER trgTrans
+CREATE TRIGGER trgInsTrans
 ON Transactions.MainTrans 
 FOR INSERT AS
 	UPDATE Services.RoomType
@@ -23,13 +23,35 @@ FOR INSERT AS
 	WHERE RoomNum = (SELECT RoomNum FROM INSERTED)
 GO
 
+
+-- Trigger Delete Transaction
+CREATE TRIGGER trgDelTrans
+ON Transactions.MainTrans 
+FOR DELETE AS
+	UPDATE Services.RoomType
+	SET RoomAvailable = RoomAvailable + 1,
+		RoomIsUsed = RoomIsUsed - 1
+	WHERE RTypeID = (
+					SELECT RTypeID FROM vRoom
+					WHERE RoomNum = (SELECT RoomNum FROM DELETED)
+					)
+	UPDATE Services.RoomNum
+	SET Status = 'Available'
+	WHERE RoomNum = (SELECT RoomNum FROM DELETED)
+	UPDATE Transactions.TransHistory
+	SET Status = 'Cancelled'
+	WHERE TransID = (SELECT TransID FROM DELETED)
+GO
+
+
+
+
 SP_HELP 'Transactions.MainTrans'						
 EXEC sp_helptrigger 'Transactions.MainTrans ';
 
 DISABLE TRIGGER trgTrans6
 ON Transactions.MainTrans;  
 
-	SELECT ROM
 	SELECT RoomAvailable FROM Services.RoomType
 	WHERE RTypeID = (
 					SELECT RTypeID FROM vRoom

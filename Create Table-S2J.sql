@@ -153,7 +153,8 @@ DROP TABLE Transactions.TransHistory
 CREATE TABLE Transactions.TransHistory(
 	TransID			VARCHAR(5) REFERENCES Transactions.MainTrans(TransID) ON DELETE CASCADE ON UPDATE CASCADE PRIMARY KEY NOT NULL,
 	TransDate		DATETIME DEFAULT CONVERT(DATE, GETDATE()) NOT NULL,
-	TransTime		DATETIME DEFAULT CONVERT(TIME, GETDATE()) UNIQUE NOT NULL
+	TransTime		DATETIME DEFAULT CONVERT(TIME, GETDATE()) UNIQUE NOT NULL,
+	Status			VARCHAR(50) DEFAULT 'Waiting (Payment Down Payment)' CHECK(Status IN ('Cancelled', 'Waiting (Payment Down Payment)', 'Waiting (Payment of Repayment)'))
 );
 
 DROP TABLE Transactions.CostRoom

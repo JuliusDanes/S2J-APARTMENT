@@ -242,7 +242,7 @@ ELSE
 	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
 GO
 
-EXEC spDelTrans 'E0030', 'T2007'
+EXEC spDelTrans 'E0030', 'T0002'
 
 SELECT * FROM vMainTrans
 
