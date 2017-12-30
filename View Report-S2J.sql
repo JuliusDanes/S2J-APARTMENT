@@ -55,9 +55,9 @@ ON T.RTypeID = S.RTypeID
 SELECT * FROM vServant
 
 -- Create View Customer Biodata
-CREATE VIEW vCustBio
+ALTER VIEW vCustBio
 AS
-SELECT U.CustID, U.NIK, U.CustName, U.Gender, U.DateOfBirth, U.Age, U.Job, K.Telephone, K.EmaiL, A.Address, A.ZipCode, A.City, C.AccountNum, C.AccountName, C.BankName
+SELECT U.CustID, U.NIK, U.CustName, U.Gender, U.DateOfBirth, U.Age, U.Job, K.Telephone, K.EmaiL, A.Address, A.ZipCode, A.City, A.Province, C.AccountNum, C.AccountName, C.BankName
 FROM Users.Customer U
 LEFT OUTER JOIN Users.CustContact K
 ON U.CustID = K.CustID
@@ -67,22 +67,42 @@ LEFT OUTER JOIN Users.CustAccount C
 ON U.CustID = C.CustID
 
 SELECT * FROM vCustBio
-SELECT * FROM Users.CustAccount
 
---View MainTrans
+--View Main Transaction
 ALTER VIEW vMainTrans
 AS
-SELECT M.TransID, H.TransDate, H.TransTime, K.CUSTNAME, M.EmpID, M.RoomNum, C.DateOfCheckIn, C.DateOfCheckOut, C.PeriodOfTime, C.TotalCost
+SELECT M.TransID, H.TransDate, H.TransTime, H.Status, C.RoomNum, R.RTypeID, C.DateOfCheckIn, C.DateOfCheckOut, C.PeriodOfTime, I.TotalInvoice, I.DP, DueDateDP, DPStatus, Repayment, DueDateRePay, RePayStatus, AlreadyPaid, Unpaid, E.EmpID, E.EmpName, E.IncumbencyID, U.CustID, U.NIK, U.CustName, U.Gender, U.DateOfBirth, U.Age, U.Job, U.Telephone, U.EmaiL, U.Address, U.ZipCode, U.City, U.Province, U.AccountNum, U.AccountName, U.BankName 
 FROM Transactions.MainTrans M
 INNER JOIN Transactions.TransHistory H
 ON M.TransID = H.TransID
 INNER JOIN Transactions.CostRoom C
 ON M.RoomNum = C.RoomNum
-INNER JOIN Users.Customer K
-ON M.CUSTID = K.CUSTID
+INNER JOIN Transactions.Invoice I
+ON M.TransID = I.TransID
+INNER JOIN vEmployee E
+ON M.EmpID = E.EmpID
+INNER JOIN vCustBio U
+ON M.CustID = U.CustID
+INNER JOIN vRoom R
+ON M.RoomNum = R.RoomNum
 
 SELECT * FROM vMainTrans
-SELECT * FROM Transactions.MainTrans
+
+SELECT * FROM Transactions.Invoice
+
+--View Transaction Header
+CREATE VIEW vTransHeader
+AS
+SELECT M.TransID, H.TransDate, H.TransTime, U.CustName, M.EmpID, M.RoomNum, C.DateOfCheckIn, C.DateOfCheckOut, C.PeriodOfTime, C.TotalCost
+FROM Transactions.MainTrans M
+INNER JOIN Transactions.TransHistory H
+ON M.TransID = H.TransID
+INNER JOIN Transactions.CostRoom C
+ON M.RoomNum = C.RoomNum
+INNER JOIN Users.Customer U
+ON M.CustID = U.CustID
+
+SELECT * FROM vTransHeader
 
 --View Customer Transaction
 CREATE VIEW vCustTrans
@@ -95,3 +115,5 @@ INNER JOIN Users.Customer U
 ON M.CustID = U.CustID
 
 SELECT * FROM vCustTrans
+
+--View Strock

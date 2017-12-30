@@ -85,9 +85,3 @@ EXEC sp_helptrigger 'Transactions.MainTrans ';
 
 DISABLE TRIGGER trgTrans6
 ON Transactions.MainTrans;  
-
-	SELECT RoomAvailable FROM Services.RoomType
-	WHERE RTypeID = (
-					SELECT RTypeID FROM vRoom
-					WHERE RoomNum = 'RS306'
-					);
