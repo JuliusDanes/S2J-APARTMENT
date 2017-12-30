@@ -41,6 +41,9 @@ GO
 
 --Hint >> @EID VARCHAR(5), @AP MONEY
 EXEC spUpInv 'E0021', 'T0001', 120000000
+EXEC spUpInv 'E0021', 'T0003', 36000000
+EXEC spUpInv 'E0021', 'T0005', 600000000
+EXEC spUpInv 'E0021', 'T0007', 72000000
 
 SELECT * FROM Transactions.Invoice
 SELECT * FROM Transactions.TransHistory

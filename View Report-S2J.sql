@@ -7,7 +7,7 @@ USE S2J_ApartmentDB
 GO
 
 		--- CREATE VIEW ---
--- Create View Incumbency & Divisions
+--View Incumbency & Divisions
 CREATE VIEW vIncDiv
 AS
 SELECT I.IncumbencyID, I.IncumbencyName, I.DivID, D.DivName, D.ChiefID
@@ -17,7 +17,7 @@ ON I.DivID = D.DivID
 
 SELECT * FROM vIncDiv
 
--- Create View Employee
+--View Employee
 CREATE VIEW vEmployee
 AS
 SELECT E.EmpID, E.NIK, E.EmpName, E.Gender, E.DateOfBirth, E.Age, E.MaritalStatus, K.Telephone, K.EmaiL, A.Address, A.ZipCode, A.City, A.Province, C.AccountNum, C.AccountName, C.BankName, I.IncumbencyID, I.IncumbencyName, D.DivName, D.ChiefID
@@ -35,7 +35,7 @@ ON I.DivID = D.DivID
 
 SELECT * FROM vEmployee
 
--- Create View Room
+--View Room
 CREATE VIEW vRoom
 AS
 SELECT N.RoomNum, N.Status, N.RTypeID, T.RTypeName, T.Price, T.RoomAvailable, T.RoomIsUsed
@@ -45,7 +45,7 @@ ON N.RTypeID = T.RTypeID
 
 SELECT * FROM vRoom
 
--- Create View Servant
+--View Servant
 CREATE VIEW vServant
 AS
 SELECT T.RTypeID, T.RTypeName, S.SerName, S.EmpID, S.SerContact FROM Services.RoomType T 
@@ -54,7 +54,31 @@ ON T.RTypeID = S.RTypeID
 
 SELECT * FROM vServant
 
--- Create View Customer Biodata
+--View Room Is Used
+ALTER VIEW vRoomIsUsed
+AS
+SELECT R.RoomNum, R.RTypeID, R.Status, M.TransID, C.DateOfCheckIn, C.DateOfCheckOut
+FROM Services.RoomNum R
+INNER JOIN Transactions.MainTrans M
+ON R.RoomNum = M.RoomNum
+INNER JOIN Transactions.CostRoom C
+ON R.RoomNum = C.RoomNum
+WHERE R.Status IN('Booked', 'Occupied')
+
+SELECT * FROM vRoomIsUsed
+
+--View Room Available
+ALTER VIEW vRoomAvailable
+AS
+SELECT R.RoomNum, R.Status, R.RTypeID, T.RTypeName, T.Price
+FROM Services.RoomNum R
+INNER JOIN Services.RoomType T
+ON R.RTypeID = T.RTypeID
+WHERE R.Status = 'Available'
+
+SELECT * FROM vRoomAvailable
+
+--View Customer Biodata
 ALTER VIEW vCustBio
 AS
 SELECT U.CustID, U.NIK, U.CustName, U.Gender, U.DateOfBirth, U.Age, U.Job, K.Telephone, K.EmaiL, A.Address, A.ZipCode, A.City, A.Province, C.AccountNum, C.AccountName, C.BankName
@@ -88,8 +112,6 @@ ON M.RoomNum = R.RoomNum
 
 SELECT * FROM vMainTrans
 
-SELECT * FROM Transactions.Invoice
-
 --View Transaction Header
 CREATE VIEW vTransHeader
 AS
@@ -116,4 +138,58 @@ ON M.CustID = U.CustID
 
 SELECT * FROM vCustTrans
 
---View Strock
+--View Receipt
+ALTER VIEW vReceipt
+AS
+SELECT M.TransID, H.TransDate, H.TransTime,U.CustID, U.CustName, E.EmpName AS 'Served by Employee', M.RoomNum, R.RTypeName, C.DateOfCheckIn, C.DateOfCheckOut, C.PeriodOfTime, C.TotalCost, I.DP, I.DueDateDP, I.Repayment, I.DueDateRePay, I.AlreadyPaid, I.Unpaid
+FROM Transactions.MainTrans M
+INNER JOIN Transactions.TransHistory H
+ON M.TransID = H.TransID
+INNER JOIN Transactions.CostRoom C
+ON M.RoomNum = C.RoomNum
+INNER JOIN Users.Customer U
+ON M.CustID = U.CustID
+INNER JOIN vEmployee E
+ON M.EmpID = E.EmpID
+INNER JOIN vRoom R
+ON M.RoomNum = R.RoomNum
+INNER JOIN Transactions.Invoice I
+ON M.TransID = I.TransID
+
+SELECT * FROM vReceipt
+
+
+		--- PROCEDURE VIEW ---
+--Proc View Receipt by Date
+CREATE PROC spvTransHeadbyDate @DCIN DATETIME, @DCOUT DATETIME
+AS
+SELECT * FROM vTransHeader
+WHERE DateOfCheckIn BETWEEN @DCIN AND @DCOUT
+ORDER BY DateOfCheckIn ASC
+GO
+
+--Hint >> @DCIN DATETIME, @DCOUT DATETIME
+EXEC spvTransHeadbyDate '2018-01-01', '2018-01-03'
+
+--Proc View Receipt by Customer
+CREATE PROC spvReceipt @CustID VARCHAR(5)
+AS
+SELECT * FROM vReceipt
+WHERE CustID = @CustID
+GO
+
+--Hint >> @CustID VARCHAR(5)
+EXEC spvReceipt 'C0005'
+
+--Proc View Transaction by Status
+ALTER PROC spvTransbyStatus @TStatus VARCHAR(50), @DPS VARCHAR(10), @RPS VARCHAR(10)
+AS
+SELECT TransID, TransDate, TransTime, Status, DP, DPStatus, Repayment, RePayStatus, AlreadyPaid, Unpaid
+FROM vMainTrans
+WHERE	Status LIKE '%' + @TStatus + '%' AND DPStatus = @DPS AND RePayStatus = @RPS
+GO
+
+EXEC spvTransbyStatus 'Waiting', 'Unpaid', 'Unpaid'
+EXEC spvTransbyStatus 'Waiting', 'Paid', 'Unpaid'
+EXEC spvTransbyStatus 'Succeed', 'Paid', 'Paid'
+EXEC spvTransbyStatus 'Cancelled', 'Unpaid', 'Unpaid'
