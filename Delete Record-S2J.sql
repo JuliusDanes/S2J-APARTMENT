@@ -6,6 +6,27 @@
 USE S2J_ApartmentDB
 GO
 
+		--- TRUNCATE TABLE ---
+TRUNCATE TABLE HumanResources.Divisions
+TRUNCATE TABLE HumanResources.Incumbency
+TRUNCATE TABLE HumanResources.Employee
+
+TRUNCATE TABLE Services.RoomType
+TRUNCATE TABLE Services.Servant
+TRUNCATE TABLE Services.RoomNum
+
+TRUNCATE TABLE Users.Customer
+TRUNCATE TABLE Users.CustContact
+TRUNCATE TABLE Users.CustAddress
+TRUNCATE TABLE Users.CustAccount
+
+TRUNCATE TABLE Transactions.MainTrans
+TRUNCATE TABLE Transactions.TransHistory
+TRUNCATE TABLE Transactions.CostRoom
+TRUNCATE TABLE Transactions.Invoice
+
+
+
 		--- DELETE RECORD ---
 -- Delete Divisions
 SELECT * FROM HumanResources.Divisions
@@ -183,7 +204,7 @@ SELECT * FROM vCustTrans
 SELECT * FROM vCustBio
 SELECT * FROM Transactions.Invoice
 
-CREATE PROC spDelTrans @EID VARCHAR(5), @TransID VARCHAR(5)
+ALTER PROC spDelTrans @EID VARCHAR(5), @TransID VARCHAR(5)
 AS
 IF @EID = (
 	SELECT EmpID FROM vEmployee
@@ -207,7 +228,9 @@ BEGIN
 						WHERE TransID = @TransID
 					);
 	DELETE Transactions.MainTrans
-	WHERE TransID = @TransID;	
+	WHERE TransID = @TransID;
+	DELETE Transactions.CostRoom
+	WHERE RoomNum = @RN	
 	PRINT 'Transaction ' + @TransID + ' for booking room number ' + @RN + ' with user id ' + @CustID + ' [' + @Name + ']' + ' successfully Deleted -'
 END
 
@@ -219,10 +242,15 @@ ELSE
 	PRINT 'Unknown Employee ID [' + CAST(@EID AS VARCHAR(5)) + '] !!!';
 GO
 
-EXEC spDelTrans 'E0030', 'T0009'
+EXEC spDelTrans 'E0030', 'T2007'
 
 SELECT * FROM vMainTrans
 
+DELETE Users.Customer
+WHERE CustID = 'C2003'
+
+DELETE Transactions.CostRoom
+WHERE RoomNum = 'RJ206'
 
 /*
 CREATE PROC spDelDiv @EID VARCHAR(5)

@@ -397,35 +397,59 @@ IF @EID = (
 	SELECT EmpID FROM vEmployee
 	WHERE (IncumbencyID = 'MCSO' OR IncumbencyID = 'CSO') AND EmpID = @EID)
 		--PRINT 'Access Allowed';
-BEGIN
-		INSERT Users.Customer(NIK, CustName, Gender, DateOfBirth, Job)
-			VALUES(@NIK, @Name, @Gender, @DOB, @Job);
-		
-		--<Batch Cust
-		DECLARE @CountC INT, @CustID VARCHAR(5), @Age INT
-		SELECT @CountC = ID FROM Users.Customer
-		WHERE CustID = '0'
-		SET @CustID = (
-			CASE
-				WHEN (@CountC < 10) THEN 'C000'
-				WHEN (@CountC >= 10) AND (@CountC < 100) THEN 'C00'
-				WHEN (@CountC >= 100) AND (@CountC < 1000) THEN 'C0'
-				WHEN (@CountC >= 1000) AND (@CountC < 10000) THEN 'C'
+BEGIN		
+		DECLARE @CustID VARCHAR(5)
+		IF @NIK = (
+				SELECT NIK FROM Users.Customer
+				WHERE NIK = @NIK)
+			BEGIN
+				--Get Customer Data
+				SELECT @CustID = CustID FROM Users.Customer
+				WHERE NIK = @NIK
+				SELECT @AccNum = AccountNum FROM Users.CustAccount
+				WHERE CustID = @CustID	
 			END
-			)
-		SET @CustID = @CustID + CAST(@CountC AS VARCHAR(5))
-		SET @Age = FLOOR(DATEDIFF(DAY, @DOB, GETDATE()) / 365.25)
 
-		UPDATE Users.Customer
-		SET CustID = @CustID,
-			Age = @Age
-		WHERE CustID = '0'
-		--?>
+		ELSE 
+			BEGIN
+				--Insert Customer Data
+				INSERT Users.Customer(NIK, CustName, Gender, DateOfBirth, Job)
+					VALUES(@NIK, @Name, @Gender, @DOB, @Job);
+		
+				--<Batch Cust
+				DECLARE @CountC INT, @Age INT
+				SELECT @CountC = ID FROM Users.Customer
+				WHERE CustID = '0'
+				SET @CustID = (
+					CASE
+						WHEN (@CountC < 10) THEN 'C000'
+						WHEN (@CountC >= 10) AND (@CountC < 100) THEN 'C00'
+						WHEN (@CountC >= 100) AND (@CountC < 1000) THEN 'C0'
+						WHEN (@CountC >= 1000) AND (@CountC < 10000) THEN 'C'
+					END
+					)
+				SET @CustID = @CustID + CAST(@CountC AS VARCHAR(5))
+				SET @Age = FLOOR(DATEDIFF(DAY, @DOB, GETDATE()) / 365.25)
 
+				UPDATE Users.Customer
+				SET CustID = @CustID,
+					Age = @Age
+				WHERE CustID = '0'
+				--?>
+
+				INSERT Users.CustContact
+					VALUES(@CustID, @Telp, @Email);
+				INSERT Users.CustAddress
+					VALUES(@CustID, @Add, @ZC, @City, @Prov);
+				INSERT Users.CustAccount
+					VALUES(@CustID, @AccNum, @AccName, @BName);
+			END
+		
+		--Insert Transaction Data
 		INSERT Transactions.MainTrans(CustID, EmpID, RoomNum)
 			VALUES(@CustID, @EID, @RN);
 
-		--Batch Trans
+		--<Batch Trans
 		DECLARE @CountT INT, @TransID VARCHAR(5), @DCOUT DATETIME, @TC MONEY, @Price MONEY, @DP MONEY, @RP MONEY, @UP MONEY
 		SELECT @CountT = ID FROM Transactions.MainTrans
 		WHERE TransID = '0'
@@ -458,21 +482,10 @@ BEGIN
 		WHERE TransID = '0'
 		--?>
 				
-		INSERT Users.CustContact
-			VALUES(@CustID, @Telp, @Email);
-
-		INSERT Users.CustAddress
-			VALUES(@CustID, @Add, @ZC, @City, @Prov);
-
-		INSERT Users.CustAccount
-			VALUES(@CustID, @AccNum, @AccName, @BName);
-		
 		INSERT Transactions.TransHistory(TransID)
 			VALUES(@TransID);
-
 		INSERT Transactions.CostRoom(RoomNum, PeriodOfTime, DateOfCheckIn, DateOfCheckOut, TotalCost)
 			VALUES(@RN, @POT, @DCIN, @DCOUT, @TC);
-
 		INSERT Transactions.Invoice(TransID, AccountNum, TotalInvoice, DP, Repayment, DueDateRePay, AlreadyPaid, Unpaid)
 			VALUES(@TransID, @AccNum, @TC, @DP, @RP, @DCIN, @AP, @UP);
 		PRINT 'Transaction ' + @TransID + ' for booking room number ' + @RN + ' with user id ' + @CustID + ' [' + @Name + ']' + ' successfully Added +'
@@ -509,4 +522,8 @@ EXEC spInsTrans 'E0031', 'RJ407', 1, '2018-01-04', 0, '3175041708450009', 'Farha
 					088493090203, 'farhan.ramadhan@eng.ui.ac.id ', 'Jl Djoko Anwar', 16518, 'Flores', 'Nusa Tenggara Timur', '3813-7268-2819-1391', 'Farhan Ramadhan', 'BJB'
 EXEC spInsTrans 'E0031', 'RJ506', 7, '2018-01-03', 0, '3175041708450010', 'Trisya Talia', 'F', '1985-12-12', 'Lawyer', 
 					083983893938, 'trisya.talia@yooho.co.id', 'Jl Gelora Bung Karno', 17818, 'Pontianak', 'Kalimantan Barat', '5229-1361-5321-4212', 'Trisya Talia', 'Bukopin'
+EXEC spInsTrans 'E0031', 'RJ206', 8, '2018-01-02', 0, '3175041708450009', 'Farhan Ramadhan', 'M', '1990-12-21', 'Police', 
+					088493090203, 'farhan.ramadhan@eng.ui.ac.id ', 'Jl Djoko Anwar', 16518, 'Flores', 'Nusa Tenggara Timur', '3813-7268-2819-1391', 'Farhan Ramadhan', 'BJB'
+EXEC spInsTrans 'E0031', 'RJ306', 1, '2018-01-03', 0, '3175041708450011', 'Tevin Dean Ramadhan', 'M', '1991-11-11', 'Freelancer', 
+					089297301048, 'tevin.dean.ramadhan@eng.ui.ac.id ', 'Jl Djoko Susilo', 16594, 'Malang', 'Jawa Timur', '6990-2442-6126-5367', 'Tevin Dean Ramadhan', 'DBS'
 

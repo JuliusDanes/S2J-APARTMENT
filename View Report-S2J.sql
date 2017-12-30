@@ -67,6 +67,7 @@ LEFT OUTER JOIN Users.CustAccount C
 ON U.CustID = C.CustID
 
 SELECT * FROM vCustBio
+SELECT * FROM Users.CustAccount
 
 --View MainTrans
 ALTER VIEW vMainTrans
@@ -81,6 +82,7 @@ INNER JOIN Users.Customer K
 ON M.CUSTID = K.CUSTID
 
 SELECT * FROM vMainTrans
+SELECT * FROM Transactions.MainTrans
 
 --View Customer Transaction
 CREATE VIEW vCustTrans
