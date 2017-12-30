@@ -180,7 +180,7 @@ CREATE TABLE Transactions.Invoice(
 					AND DueDateRePay <= DATEADD(DAY, 7, CONVERT(DATE, GETDATE()))),
 	RePayStatus		VARCHAR(10) DEFAULT 'Unpaid' CHECK(RePayStatus IN('Paid', 'Unpaid')) NOT NULL,
 	AlreadyPaid		MONEY DEFAULT 0 CHECK(AlreadyPaid >= 0) NOT NULL,
-	Unpaid			MONEY CHECK(Unpaid >= 0)
+	Unpaid			MONEY CHECK(Unpaid >= 0) NOT NULL
 );
 
 DROP TABLE Transactions.Invoice;

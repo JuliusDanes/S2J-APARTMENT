@@ -15,9 +15,11 @@ IF @EID = (
 	SELECT EmpID FROM vEmployee
 	WHERE (IncumbencyID = 'MFO' OR IncumbencyID = 'FO') AND EmpID = @EID)
 		--PRINT 'Access Allowed';
-BEGIN		
+BEGIN
+		DECLARE @UP MONEY
 		UPDATE Transactions.Invoice
 		SET AlreadyPaid = @AP,
+			Unpaid = TotalInvoice - @AP,
 			DPStatus = (CASE
 							WHEN (@AP >= DP) THEN 'Paid'
 							WHEN (@AP < DP) THEN 'Unpaid'
@@ -38,7 +40,7 @@ ELSE
 GO
 
 --Hint >> @EID VARCHAR(5), @AP MONEY
-EXEC spUpInv 'E0021', 'T0001', 12000000
+EXEC spUpInv 'E0021', 'T0001', 120000000
 
 SELECT * FROM Transactions.Invoice
 SELECT * FROM Transactions.TransHistory
