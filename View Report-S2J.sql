@@ -20,7 +20,7 @@ SELECT * FROM vIncDiv
 --View Employee
 CREATE VIEW vEmployee
 AS
-SELECT E.EmpID, E.NIK, E.EmpName, E.Gender, E.DateOfBirth, E.Age, E.MaritalStatus, K.Telephone, K.EmaiL, A.Address, A.ZipCode, A.City, A.Province, C.AccountNum, C.AccountName, C.BankName, I.IncumbencyID, I.IncumbencyName, D.DivName, D.ChiefID
+SELECT E.EmpID, E.NIK, E.EmpName, E.Gender, E.DateOfBirth, E.Age, E.MaritalStatus, K.Telephone, K.EmaiL, A.Address, A.ZipCode, A.City, A.Province, C.AccountNum, C.AccountName, C.BankName, I.IncumbencyID, I.IncumbencyName, D.DivName, D.ChiefID, E.Salary
 FROM HumanResources.Employee E
 LEFT OUTER JOIN HumanResources.EmpContact K
 ON E.EmpID = K.EmpID
@@ -78,8 +78,8 @@ WHERE R.Status = 'Available'
 
 SELECT * FROM vRoomAvailable
 
---View Customer Biodata
-ALTER VIEW vCustBio
+--View Customer Data
+CREATE VIEW vCustData
 AS
 SELECT U.CustID, U.NIK, U.CustName, U.Gender, U.DateOfBirth, U.Age, U.Job, K.Telephone, K.EmaiL, A.Address, A.ZipCode, A.City, A.Province, C.AccountNum, C.AccountName, C.BankName
 FROM Users.Customer U
@@ -90,7 +90,7 @@ ON U.CustID = A.CustID
 LEFT OUTER JOIN Users.CustAccount C
 ON U.CustID = C.CustID
 
-SELECT * FROM vCustBio
+SELECT * FROM vCustData
 
 --View Main Transaction
 ALTER VIEW vMainTrans
@@ -105,7 +105,7 @@ INNER JOIN Transactions.Invoice I
 ON M.TransID = I.TransID
 INNER JOIN vEmployee E
 ON M.EmpID = E.EmpID
-INNER JOIN vCustBio U
+INNER JOIN vCustData U
 ON M.CustID = U.CustID
 INNER JOIN vRoom R
 ON M.RoomNum = R.RoomNum

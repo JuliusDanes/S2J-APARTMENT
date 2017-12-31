@@ -502,7 +502,7 @@ GO
 --Hint >> @EID VARCHAR(5), @RN VARCHAR(5), @POT INT, @DCIN DATETIME, @AP MONEY, @NIK BIGINT, @Name VARCHAR(30), @Gender VARCHAR(10), @DOB DATETIME, @Job VARCHAR(30),
 --			 @Telp BIGINT, @Email VARCHAR(100), @Add VARCHAR(200), @ZC INT, @City VARCHAR(30), @Prov VARCHAR(30), @AccNum VARCHAR(19), @AccName VARCHAR(30), @BName VARCHAR(30)
 
-EXEC spInsTrans 'E0031', 'RS102', 1, '2017-12-30', 0, '3175041708450001', 'Johanes Chandra', 'M', '1990-08-17', 'Entrepreneur', 
+EXEC spInsTrans 'E0031', 'RS102', 1, '2017-12-31', 0, '3175041708450001', 'Johanes Chandra', 'M', '1990-08-17', 'Entrepreneur', 
 					085214149801, 'johanes.chandra@geevv.com', 'Jl Jendral Sudirman No 10', 14045, 'Padang', 'Sumatra Barat', '1650-1780-1605-2018', 'Johanes Chandra', 'BCA'
 EXEC spInsTrans 'E0031', 'RS203', 2, '2018-01-05', 0, '3175041708450002', 'Diaz Rivaldo', 'M', '1988-05-16', 'Employee', 
 					082929192012, 'diaz.rivaldo@geevv.com', 'Jl Manggis Raya No 6', 14022, 'Sentolo', 'Yogyakarta', '7829-2839-1042-1040', 'Diaz Rivaldo', 'BRI'

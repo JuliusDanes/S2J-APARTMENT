@@ -51,12 +51,18 @@ FOR UPDATE AS
 	SELECT @TransID = TransID FROM INSERTED
 	SELECT @DPS = DPStatus FROM INSERTED
 	SELECT @RPS = RePayStatus FROM INSERTED
+	IF UPDATE (DPStatus) OR UPDATE (RePayStatus)
+	BEGIN
 	IF @DPS = 'Paid'	
 		BEGIN
 			UPDATE Transactions.TransHistory
 			SET Status = 'Waiting (Payment of Repayment)'
 			WHERE TransID = @TransID
-			PRINT 'Payment transaction of down payment is successful.'; 
+			PRINT 'Payment transaction of down payment is successful.'
+			UPDATE Services.RoomNum
+			SET Status = 'Occupied'
+			WHERE RoomNum = (SELECT RoomNum FROM Transactions.MainTrans
+								WHERE TransID = @TransID);
 			IF @RPS = 'Paid'
 				BEGIN					
 					UPDATE Transactions.TransHistory
@@ -76,7 +82,12 @@ FOR UPDATE AS
 			UPDATE Transactions.TransHistory
 			SET Status = 'Waiting (Payment of Down Payment)'			
 			WHERE TransID = @TransID			
+			UPDATE Services.RoomNum
+			SET Status = 'Booked'
+			WHERE RoomNum = (SELECT RoomNum FROM Transactions.MainTrans
+								WHERE TransID = @TransID);
 		END
+	END
 GO
 
 
