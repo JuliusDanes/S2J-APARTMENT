@@ -17,6 +17,7 @@ ON I.DivID = D.DivID
 
 SELECT * FROM vIncDiv
 
+
 --View Employee
 CREATE VIEW vEmployee
 AS
@@ -35,6 +36,7 @@ ON I.DivID = D.DivID
 
 SELECT * FROM vEmployee
 
+
 --View Room
 CREATE VIEW vRoom
 AS
@@ -45,6 +47,7 @@ ON N.RTypeID = T.RTypeID
 
 SELECT * FROM vRoom
 
+
 --View Servant
 CREATE VIEW vServant
 AS
@@ -53,6 +56,7 @@ INNER JOIN Services.Servant S
 ON T.RTypeID = S.RTypeID
 
 SELECT * FROM vServant
+
 
 --View Room Is Used
 ALTER VIEW vRoomIsUsed
@@ -67,6 +71,7 @@ WHERE R.Status IN('Booked', 'Occupied')
 
 SELECT * FROM vRoomIsUsed
 
+
 --View Room Available
 ALTER VIEW vRoomAvailable
 AS
@@ -77,6 +82,7 @@ ON R.RTypeID = T.RTypeID
 WHERE R.Status = 'Available'
 
 SELECT * FROM vRoomAvailable
+
 
 --View Customer Data
 CREATE VIEW vCustData
@@ -91,6 +97,7 @@ LEFT OUTER JOIN Users.CustAccount C
 ON U.CustID = C.CustID
 
 SELECT * FROM vCustData
+
 
 --View Main Transaction
 ALTER VIEW vMainTrans
@@ -112,6 +119,7 @@ ON M.RoomNum = R.RoomNum
 
 SELECT * FROM vMainTrans
 
+
 --View Transaction Header
 CREATE VIEW vTransHeader
 AS
@@ -126,6 +134,7 @@ ON M.CustID = U.CustID
 
 SELECT * FROM vTransHeader
 
+
 --View Customer Transaction
 CREATE VIEW vCustTrans
 AS
@@ -138,10 +147,11 @@ ON M.CustID = U.CustID
 
 SELECT * FROM vCustTrans
 
+
 --View Receipt
 ALTER VIEW vReceipt
 AS
-SELECT M.TransID, H.TransDate, H.TransTime,U.CustID, U.CustName, E.EmpName AS 'Served by Employee', M.RoomNum, R.RTypeName, C.DateOfCheckIn, C.DateOfCheckOut, C.PeriodOfTime, C.TotalCost, I.DP, I.DueDateDP, I.Repayment, I.DueDateRePay, I.AlreadyPaid, I.Unpaid
+SELECT M.TransID, H.TransDate, H.TransTime,U.CustID, U.CustName, E.EmpName AS 'Served by Employee', M.RoomNum, R.RTypeName, R.Price, C.DateOfCheckIn, C.DateOfCheckOut, C.PeriodOfTime, C.TotalCost, I.DP, I.DueDateDP, I.Repayment, I.DueDateRePay, I.AlreadyPaid, I.Unpaid
 FROM Transactions.MainTrans M
 INNER JOIN Transactions.TransHistory H
 ON M.TransID = H.TransID
@@ -171,6 +181,7 @@ GO
 --Hint >> @DCIN DATETIME, @DCOUT DATETIME
 EXEC spvTransHeadbyDate '2018-01-01', '2018-01-03'
 
+
 --Proc View Receipt by Customer
 CREATE PROC spvReceipt @CustID VARCHAR(5)
 AS
@@ -180,6 +191,7 @@ GO
 
 --Hint >> @CustID VARCHAR(5)
 EXEC spvReceipt 'C0005'
+
 
 --Proc View Transaction by Status
 ALTER PROC spvTransbyStatus @TStatus VARCHAR(50), @DPS VARCHAR(10), @RPS VARCHAR(10)

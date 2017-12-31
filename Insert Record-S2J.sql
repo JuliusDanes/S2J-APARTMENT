@@ -42,6 +42,7 @@ EXEC spInsDiv 'FOUND', 'MIDIV', 'Marketing and Information', 'E0009'
 EXEC spInsDiv 'FOUND', 'CDDIV', 'Creative Development', 'E0010'
 EXEC spInsDiv 'FOUND', 'QADIV', 'Quality Assurance', 'E0011'
 
+
 --Insert Incumbency
 SELECT * FROM HumanResources.Incumbency
 CREATE PROC spInsInc @EID VARCHAR(5), @IncID VARCHAR(10), @IncName VARCHAR(100), @DivID VARCHAR(10)
@@ -114,6 +115,7 @@ EXEC spInsInc 'FOUND', 'MMO', 'Manager Marketing Officer', 'MIDIV'
 EXEC spInsInc 'FOUND', 'MO', 'Marketing Officer', 'MIDIV'
 EXEC spInsInc 'FOUND', 'MPRO', 'Manager Public Relations Officer', 'MIDIV'
 EXEC spInsInc 'FOUND', 'PRO', 'Public Relations Officer', 'MIDIV'
+
 
 --Insert Employee
 SELECT * FROM HumanResources.Employee
@@ -252,6 +254,7 @@ EXEC spInsEmp 'FOUND', 3175042512990064, 'Barbara Decker', 'M', '1984-12-21', 'M
 EXEC spInsEmp 'FOUND', 3175042512990065, 'Eugene Zabokritski', 'F', '1987-12-21', 'S', 038728163857, NULL, '3385 Crestview Drive', NULL, 'Jakarta', 'DKI Jakarta', '1219-5545-0192-9292', 'Eugene Zabokritski', 'Bukopin', 'SVO', 14000000
 EXEC spInsEmp 'FOUND', 3175042512990066, 'Jeff Hay', 'F', '1982-12-21', 'S', 038161285728, NULL, '2275 Valley Blvd', NULL, 'Bandung', 'Jawa Barat', '2421-5552-0191-9304', 'Jeff Hay', 'Bukopin', 'SVO', 14000000
 
+
 --Insert Room Type
 SELECT * FROM Services.RoomType
 CREATE PROC spInsRoomType @EID VARCHAR(5), @RTID VARCHAR(10), @RTN VARCHAR(100), @Price MONEY
@@ -281,6 +284,7 @@ EXEC spInsRoomType 'E0016', 'R-II', 'Alcove Minimalist', 120000000
 EXEC spInsRoomType 'E0016', 'R-III', 'Convertible', 110000000
 EXEC spInsRoomType 'E0016', 'R-IV', '4Play Room', 150000000
 EXEC spInsRoomType 'E0016', 'R-V', 'Loft Vintage', 130000000
+
 
 --Insert Servant
 SELECT * FROM Services.Servant
@@ -326,6 +330,7 @@ EXEC spInsServ 'E0016', 'E0061', 'R-IV', 944
 EXEC spInsServ 'E0016', 'E0062', 'R-IV', 944
 EXEC spInsServ 'E0016', 'E0063', 'R-V', 955
 EXEC spInsServ 'E0016', 'E0064', 'R-V', 955
+
 
 --Insert RoomNum
 SELECT * FROM Services.RoomNum
@@ -388,6 +393,7 @@ EXEC spInsRoom 'E0016', 'R-II', 'J', 10
 EXEC spInsRoom 'E0016', 'R-III', 'J', 10
 EXEC spInsRoom 'E0016', 'R-IV', 'J', 10
 EXEC spInsRoom 'E0016', 'R-V', 'J', 10
+
 
 --Insert Transactions
 ALTER PROC spInsTrans @EID VARCHAR(5), @RN VARCHAR(5), @POT INT, @DCIN DATETIME, @AP MONEY, @NIK BIGINT, @Name VARCHAR(30), @Gender VARCHAR(10), @DOB DATETIME, @Job VARCHAR(30),
@@ -469,7 +475,7 @@ BEGIN
 							SELECT T.RTypeID FROM Services.RoomType T
 							INNER JOIN Services.RoomNum N
 							ON T.RTypeID = N.RTypeID
-							WHERE N.RoomNum = 'RS203'
+							WHERE N.RoomNum = @RN
 						)
 		SET @TC = @Price * @POT --Total Cost/Invoice
 
@@ -526,4 +532,3 @@ EXEC spInsTrans 'E0031', 'RJ206', 8, '2018-01-02', 0, '3175041708450009', 'Farha
 					088493090203, 'farhan.ramadhan@eng.ui.ac.id ', 'Jl Djoko Anwar', 16518, 'Flores', 'Nusa Tenggara Timur', '3813-7268-2819-1391', 'Farhan Ramadhan', 'BJB'
 EXEC spInsTrans 'E0031', 'RJ306', 1, '2018-01-03', 0, '3175041708450011', 'Tevin Dean Ramadhan', 'M', '1991-11-11', 'Freelancer', 
 					089297301048, 'tevin.dean.ramadhan@eng.ui.ac.id ', 'Jl Djoko Susilo', 16594, 'Malang', 'Jawa Timur', '6990-2442-6126-5367', 'Tevin Dean Ramadhan', 'DBS'
-

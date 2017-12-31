@@ -43,6 +43,38 @@ FOR DELETE AS
 	WHERE TransID = (SELECT TransID FROM DELETED)
 GO
 
+
+-- Trigger Update Transaction Room
+CREATE TRIGGER trgUpTransRoom
+ON Transactions.MainTrans 
+AFTER UPDATE AS
+IF UPDATE (RoomNum)
+BEGIN
+	UPDATE Services.RoomType
+	SET RoomAvailable = RoomAvailable + 1,
+		RoomIsUsed = RoomIsUsed - 1
+	WHERE RTypeID = (
+					SELECT RTypeID FROM vRoom
+					WHERE RoomNum = (SELECT RoomNum FROM DELETED)
+					)
+	UPDATE Services.RoomNum
+	SET Status = 'Available'
+	WHERE RoomNum = (SELECT RoomNum FROM DELETED)
+	
+	UPDATE Services.RoomType
+	SET RoomAvailable = RoomAvailable - 1,
+		RoomIsUsed = RoomIsUsed + 1
+	WHERE RTypeID = (
+					SELECT RTypeID FROM vRoom
+					WHERE RoomNum = (SELECT RoomNum FROM INSERTED)
+					)
+	UPDATE Services.RoomNum
+	SET Status = 'Booked'
+	WHERE RoomNum = (SELECT RoomNum FROM INSERTED)	
+END
+GO
+
+
 -- Trigger Update Invoice
 CREATE TRIGGER trgUpInvoice
 ON Transactions.Invoice
@@ -89,7 +121,6 @@ FOR UPDATE AS
 		END
 	END
 GO
-
 
 SP_HELP 'Transactions.MainTrans'						
 EXEC sp_helptrigger 'Transactions.MainTrans ';
