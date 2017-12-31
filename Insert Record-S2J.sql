@@ -18,7 +18,7 @@ IF @EID = 'FOUND' OR @EID = (
 BEGIN
 		INSERT HumanResources.Divisions(DivID, DivName, ChiefID)
 			VALUES(@DivID, @DivName, @ChiefID);
-		PRINT 'Division ' + @DivID + ' [' + @DivName + ']' + ' successfully Added +'
+		PRINT 'Division ' + @DivID + ' [' + @DivName + ']' + ' successfully Added +';
 END
 
 ELSE IF @EID = (
@@ -54,7 +54,7 @@ IF @EID = 'FOUND' OR @EID = (
 BEGIN
 		INSERT HumanResources.Incumbency
 			VALUES(@IncID, @IncName, @DivID);
-		PRINT 'Incumbency ' + @IncID + ' [' + @IncName + ']' + ' successfully Added +'
+		PRINT 'Incumbency ' + @IncID + ' [' + @IncName + ']' + ' successfully Added +';
 END
 
 ELSE IF @EID = (
@@ -166,7 +166,7 @@ BEGIN
 			VALUES(@EmpID, @Add, @ZC, @City, @Prov);
 		INSERT HumanResources.EmpAccount
 			VALUES(@EmpID, @AccNum, @AccName, @BName);
-		PRINT 'Employee ' + @EmpID + ' [' + @Name + ']' + ' successfully Added +'
+		PRINT 'Employee ' + @EmpID + ' [' + @Name + ']' + ' successfully Added +';
 END
 ELSE IF @EID = (
 	SELECT EmpID FROM vEmployee
@@ -266,7 +266,7 @@ IF @EID = (
 BEGIN
 		INSERT Services.RoomType(RTypeID, RTypeName, Price)
 			VALUES(@RTID, @RTN, @Price);
-		PRINT 'Room Type ' + @RTID + ' [' + @RTN + ']' + ' successfully Added +'
+		PRINT 'Room Type ' + @RTID + ' [' + @RTN + ']' + ' successfully Added +';
 END
 
 ELSE IF @EID = (
@@ -304,7 +304,7 @@ BEGIN
 				BEGIN
 				INSERT Services.Servant
 					VALUES(@SN, @EmpID, @RTID, @SC);				
-				PRINT 'Servant Room Type ' + @RTID + ', ' + @EmpID + ' [' + @SN + ']' + ' successfully Added +'
+				PRINT 'Servant Room Type ' + @RTID + ', ' + @EmpID + ' [' + @SN + ']' + ' successfully Added +';
 				END
 		ELSE 
 			PRINT 'He/She is not a SERVANT!';
@@ -369,7 +369,7 @@ BEGIN
 			VALUES(@RN, @RTID)
 			SET @Count = CAST(@Count AS INT)
 			SET @Count = @Count + 1;			
-			PRINT 'Room Num ' + @RN + ' [Room Type ' + @RTID + ']' + ' successfully Added +'
+			PRINT 'Room Num ' + @RN + ' [Room Type ' + @RTID + ']' + ' successfully Added +';
 		END
 END
 
@@ -494,7 +494,7 @@ BEGIN
 			VALUES(@RN, @POT, @DCIN, @DCOUT, @TC);
 		INSERT Transactions.Invoice(TransID, AccountNum, TotalInvoice, DP, Repayment, DueDateRePay, AlreadyPaid, Unpaid)
 			VALUES(@TransID, @AccNum, @TC, @DP, @RP, @DCIN, @AP, @UP);
-		PRINT 'Transaction ' + @TransID + ' for booking room number ' + @RN + ' with user id ' + @CustID + ' [' + @Name + ']' + ' successfully Added +'
+		PRINT 'Transaction ' + @TransID + ' for booking room number ' + @RN + ' with Customer ID ' + @CustID + ' [' + @Name + ']' + ' successfully Added +';
 END
 
 ELSE IF @EID = (

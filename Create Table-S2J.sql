@@ -217,6 +217,3 @@ SELECT * FROM Transactions.MainTrans
 SELECT * FROM Transactions.TransHistory
 SELECT * FROM Transactions.CostRoom
 SELECT * FROM Transactions.Invoice
-
-DROP TRIGGER Transactions.MainTrans.trgTrans4
-ON Transactions.MainTrans;  

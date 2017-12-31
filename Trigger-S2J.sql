@@ -127,3 +127,6 @@ EXEC sp_helptrigger 'Transactions.MainTrans ';
 
 DISABLE TRIGGER trgTrans6
 ON Transactions.MainTrans;  
+
+DROP TRIGGER Transactions.MainTrans.trgTrans4
+ON Transactions.MainTrans;  

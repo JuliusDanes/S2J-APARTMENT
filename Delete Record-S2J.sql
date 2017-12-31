@@ -280,7 +280,7 @@ EXEC spDelDiv
 */
 
 /*
-TRUNCATE TABLE HumanResources.Divisions
-DBCC CHECKIDENT ('HumanResources.Divisions', RESEED, 1)
+TRUNCATE TABLE HumanResources.Employee
+DBCC CHECKIDENT ('HumanResources.Employee', RESEED, 1)
 GO
 */
