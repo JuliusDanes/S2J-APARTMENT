@@ -79,12 +79,12 @@ GO
 CREATE TRIGGER trgUpInvoice
 ON Transactions.Invoice
 FOR UPDATE AS
+IF UPDATE (DPStatus) OR UPDATE (RePayStatus)
+BEGIN
 	DECLARE @TransID VARCHAR(5), @DPS VARCHAR(10), @RPS VARCHAR(10)	
 	SELECT @TransID = TransID FROM INSERTED
 	SELECT @DPS = DPStatus FROM INSERTED
 	SELECT @RPS = RePayStatus FROM INSERTED
-	IF UPDATE (DPStatus) OR UPDATE (RePayStatus)
-	BEGIN
 	IF @DPS = 'Paid'	
 		BEGIN
 			UPDATE Transactions.TransHistory
@@ -119,14 +119,29 @@ FOR UPDATE AS
 			WHERE RoomNum = (SELECT RoomNum FROM Transactions.MainTrans
 								WHERE TransID = @TransID);
 		END
-	END
+END
 GO
+
+
+-- Trigger Update Customer Account
+CREATE TRIGGER trgUpCustAcc
+ON Users.CustAccount
+FOR UPDATE AS
+IF UPDATE (AccountNum)
+BEGIN
+	UPDATE Transactions.Invoice
+	SET AccountNum = (SELECT AccountNum FROM INSERTED)
+	WHERE TransID = (SELECT TransID FROM vMainTrans
+					WHERE CustID = (SELECT CustID FROM INSERTED))
+END
+GO
+
 
 SP_HELP 'Transactions.MainTrans'						
 EXEC sp_helptrigger 'Transactions.MainTrans ';
 
-DISABLE TRIGGER trgTrans6
+DISABLE TRIGGER trgTrans
 ON Transactions.MainTrans;  
 
-DROP TRIGGER Transactions.MainTrans.trgTrans4
+DROP TRIGGER dbo.trgInsTrans
 ON Transactions.MainTrans;  

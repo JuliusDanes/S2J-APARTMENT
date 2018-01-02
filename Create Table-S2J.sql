@@ -15,6 +15,7 @@ CREATE SCHEMA HumanResources;
 CREATE SCHEMA Services;
 CREATE SCHEMA Users;
 CREATE SCHEMA Transactions;
+CREATE SCHEMA Log;
 
 		--- CREATE TABLE ---
 --Create Table Employee
@@ -182,6 +183,9 @@ CREATE TABLE Transactions.Invoice(
 	AlreadyPaid		MONEY DEFAULT 0 CHECK(AlreadyPaid >= 0) NOT NULL,
 	Unpaid			MONEY CHECK(Unpaid >= 0) NOT NULL
 );
+
+
+
 
 DROP TABLE Transactions.Invoice;
 DROP TABLE Transactions.CostRoom;
