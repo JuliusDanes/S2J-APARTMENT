@@ -100,9 +100,9 @@ SELECT * FROM vCustData
 
 
 --View Main Transaction
-ALTER VIEW vMainTrans
+CREATE VIEW vMainTrans
 AS
-SELECT M.TransID, H.TransDate, H.TransTime, H.Status, C.RoomNum, R.RTypeID, C.DateOfCheckIn, C.DateOfCheckOut, C.PeriodOfTime, I.TotalInvoice, I.DP, DueDateDP, DPStatus, Repayment, DueDateRePay, RePayStatus, AlreadyPaid, Unpaid, E.EmpID, E.EmpName, E.IncumbencyID, U.CustID, U.NIK, U.CustName, U.Gender, U.DateOfBirth, U.Age, U.Job, U.Telephone, U.EmaiL, U.Address, U.ZipCode, U.City, U.Province, U.AccountNum, U.AccountName, U.BankName 
+SELECT M.TransID, H.TransDate, H.TransTime, H.Status, C.RoomNum, R.RTypeID, R.Price, C.DateOfCheckIn, C.DateOfCheckOut, C.PeriodOfTime, C.TotalCost, I.TotalInvoice, I.DP, DueDateDP, DPStatus, Repayment, DueDateRePay, RePayStatus, AlreadyPaid, Unpaid, E.EmpID, E.EmpName, E.IncumbencyID, U.CustID, U.NIK, U.CustName, U.Gender, U.DateOfBirth, U.Age, U.Job, U.Telephone, U.EmaiL, U.Address, U.ZipCode, U.City, U.Province, U.AccountNum, U.AccountName, U.BankName 
 FROM Transactions.MainTrans M
 INNER JOIN Transactions.TransHistory H
 ON M.TransID = H.TransID

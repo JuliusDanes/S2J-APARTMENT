@@ -246,13 +246,12 @@ GO
 
 EXEC spDelTrans 'E0030', 'T0002'
 
-SELECT * FROM vMainTrans
 
-DELETE Users.Customer
-WHERE CustID = 'C2003'
+DELETE Log.Customer
+WHERE LogCID = 'LOG0001'
 
-DELETE Transactions.CostRoom
-WHERE RoomNum = 'RJ206'
+DELETE Log.Transactions
+WHERE LogTID = 'LOG0001'
 
 /*
 CREATE PROC spDelDiv @EID VARCHAR(5)
