@@ -282,7 +282,7 @@ GO
 EXEC spInsRoomType 'E0016', 'R-I', 'Garden Apartement', 160000000
 EXEC spInsRoomType 'E0016', 'R-II', 'Alcove Minimalist', 120000000
 EXEC spInsRoomType 'E0016', 'R-III', 'Convertible', 110000000
-EXEC spInsRoomType 'E0016', 'R-IV', '4Play Room', 150000000
+EXEC spInsRoomType 'E0016', 'R-IV', '4Play Block', 150000000
 EXEC spInsRoomType 'E0016', 'R-V', 'Loft Vintage', 130000000
 
 
