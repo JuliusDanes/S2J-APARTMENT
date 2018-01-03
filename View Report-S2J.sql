@@ -201,6 +201,7 @@ FROM vMainTrans
 WHERE	Status LIKE '%' + @TStatus + '%' AND DPStatus = @DPS AND RePayStatus = @RPS
 GO
 
+--Hint >> @TStatus VARCHAR(50), @DPS VARCHAR(10), @RPS VARCHAR(10)
 EXEC spvTransbyStatus 'Waiting', 'Unpaid', 'Unpaid'
 EXEC spvTransbyStatus 'Waiting', 'Paid', 'Unpaid'
 EXEC spvTransbyStatus 'Succeed', 'Paid', 'Paid'
