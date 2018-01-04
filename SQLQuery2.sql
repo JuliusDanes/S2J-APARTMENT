@@ -477,3 +477,76 @@ AS
 RETURN
 
 DELETE FROM TRANS WHERE TRANSID = 'T001'
+
+
+		--- BACKUP & RESTORE DATABASE --
+		
+DROP DATABASE ContosoDB
+CREATE DATABASE ContosoDB
+USE ContosoDB 		
+
+BACKUP DATABASE ContosoDB
+TO  
+	DISK = 'D:\ContosoDB.BAK'
+WITH STATS = 25, FORMAT,
+     NAME = 'Full Backup of ContosoDB';
+GO
+
+RESTORE DATABASE ContosoDB   
+   FROM DISK =  'D:\ContosoDB.BAK';
+GO  
+
+CREATE MASTER KEY ENCRYPTION BY PASSWORD='TestPass'
+
+USE ContosoDB
+GO
+CREATE CERTIFICATE BackupCertificate
+WITH SUBJECT = 'SQL Server 2014 Backup Encryption test';
+GO
+
+-- Backup the Service Master Key
+USE ContosoDB
+GO
+BACKUP SERVICE MASTER KEY
+
+TO FILE = 'D:\SQL2017_SMK.key'
+
+ENCRYPTION BY PASSWORD = 'SMKDBEncryption';
+
+GO
+
+BACKUP MASTER KEY
+
+TO FILE = 'D:\SQL2017_DMK.key'
+
+ENCRYPTION BY PASSWORD = 'DMKDBEncryption';
+
+GO
+
+BACKUP CERTIFICATE BackupCertificate
+
+TO FILE = 'D:\SQL2017_BackupCertificate.cer'
+
+WITH PRIVATE KEY
+
+        (
+
+                FILE = 'D:\SQL2017_CertificateKey.key'
+
+                , ENCRYPTION BY PASSWORD = 'CertificateDBEncryption'
+
+        );
+
+GO
+
+BACKUP DATABASE ContosoDB
+TO DISK = N'D:\TestTSQLEncryptedBackup.bak'
+WITH
+  COMPRESSION,
+  ENCRYPTION 
+   (
+   ALGORITHM = AES_256,
+   SERVER CERTIFICATE = BackupCertificate
+   )
+ GO
+

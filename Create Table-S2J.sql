@@ -269,10 +269,16 @@ DROP TABLE Log.Customer;
 
 
 		--- BACKUP & RESTORE DATABASE ---
+SELECT * INTO BackupIncDiv FROM vIncDiv
+SELECT * INTO BackupEmp FROM vEmployee
+SELECT * INTO BackupRoom FROM vRoom
+SELECT * INTO BackupCust FROM vCustData
+SELECT * INTO BackupTrans FROM vMainTrans
+
 BACKUP DATABASE S2J_ApartmentDB
 TO  DISK = 'C:\Program Files\Microsoft SQL Server\MSSQL12.SQLSERVER14\MSSQL\Backup\S2J_ApartmentDB.BAK',
 	DISK = 'D:\S2J_ApartmentDB.BAK'
-WITH FORMAT,
+WITH STATS = 25, FORMAT,
       NAME = 'Full Backup of S2J_ApartmentDB';
 GO
 

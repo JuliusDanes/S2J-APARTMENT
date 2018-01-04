@@ -6,8 +6,9 @@
 USE S2J_ApartmentDB
 GO
 
+		--- TRIGGER ---
 -- Trigger Delete Transaction
-CREATE TRIGGER trgDelTrans
+CREATE TRIGGER Transactions.trgDelTrans
 ON Transactions.TransHistory
 INSTEAD OF UPDATE AS
 IF UPDATE (Status)
@@ -77,9 +78,8 @@ END
 GO
 
 
-		--- TRIGGER ---
 -- Trigger Insert Transaction
-CREATE TRIGGER trgInsTrans
+CREATE TRIGGER Transactions.trgInsTrans
 ON Transactions.MainTrans
 FOR INSERT AS
 	UPDATE Services.RoomType
@@ -97,7 +97,7 @@ GO
 
 
 -- Trigger Update Transaction Room
-CREATE TRIGGER trgUpTransRoom
+CREATE TRIGGER Transactions.trgUpTransRoom
 ON Transactions.MainTrans 
 AFTER UPDATE AS
 IF UPDATE (RoomNum)
@@ -128,7 +128,7 @@ GO
 
 
 -- Trigger Update Invoice
-CREATE TRIGGER trgUpInvoice
+CREATE TRIGGER Transactions.trgUpInvoice
 ON Transactions.Invoice
 FOR UPDATE AS
 IF UPDATE (DPStatus) OR UPDATE (RePayStatus)
@@ -176,7 +176,7 @@ GO
 
 
 -- Trigger Update Customer Account
-CREATE TRIGGER trgUpCustAcc
+CREATE TRIGGER Users.trgUpCustAcc
 ON Users.CustAccount
 FOR UPDATE AS
 IF UPDATE (AccountNum)
@@ -190,19 +190,19 @@ GO
 
 
 -- Trigger Delete Log Customer
-CREATE TRIGGER trgLogCust
+CREATE TRIGGER Log.trgLogCust
 ON Log.Customer
-FOR DELETE AS
-	PRINT 'Deletion of Log Customer is not allowed!'
+FOR UPDATE, DELETE AS
+	PRINT 'Updation or Deletion of Log Customer is not allowed!'
 	ROLLBACK TRANSACTION;
 RETURN;
 
 
 -- Trigger Delete Log Customer
-CREATE TRIGGER trgLogTrans
+CREATE TRIGGER Log.trgLogTrans
 ON Log.Transactions
-FOR DELETE AS
-	PRINT 'Deletion of Log Transactions is not allowed!'
+FOR UPDATE, DELETE AS
+	PRINT 'Updation or Deletion of Log Transactions is not allowed!'
 	ROLLBACK TRANSACTION;
 RETURN;
 
