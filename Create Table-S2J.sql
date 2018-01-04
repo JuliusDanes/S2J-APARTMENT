@@ -266,3 +266,16 @@ DROP TABLE Services.Servant;
 DROP TABLE Services.RoomType;
 DROP TABLE Log.Transactions;
 DROP TABLE Log.Customer;
+
+
+		--- BACKUP & RESTORE DATABASE ---
+BACKUP DATABASE S2J_ApartmentDB
+TO  DISK = 'C:\Program Files\Microsoft SQL Server\MSSQL12.SQLSERVER14\MSSQL\Backup\S2J_ApartmentDB.BAK',
+	DISK = 'D:\S2J_ApartmentDB.BAK'
+WITH FORMAT,
+      NAME = 'Full Backup of S2J_ApartmentDB';
+GO
+
+RESTORE DATABASE S2J_ApartmentDB   
+   FROM DISK = 'D:\S2J_ApartmentDB.BAK';
+GO  
