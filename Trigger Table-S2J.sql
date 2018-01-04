@@ -196,6 +196,7 @@ FOR UPDATE, DELETE AS
 	PRINT 'Updation or Deletion of Log Customer is not allowed!'
 	ROLLBACK TRANSACTION;
 RETURN;
+GO
 
 
 -- Trigger Delete Log Customer
@@ -205,14 +206,15 @@ FOR UPDATE, DELETE AS
 	PRINT 'Updation or Deletion of Log Transactions is not allowed!'
 	ROLLBACK TRANSACTION;
 RETURN;
+GO
 
 
 
 SP_HELP 'Transactions.MainTrans'						
 EXEC sp_helptrigger 'Transactions.MainTrans ';
 
-DISABLE TRIGGER trgTrans
+DISABLE TRIGGER Transactions.trgTrans
 ON Transactions.MainTrans;  
 
-DROP TRIGGER dbo.trgInsTrans
+DROP TRIGGER Transactions.trgInsTrans
 ON Transactions.MainTrans;  

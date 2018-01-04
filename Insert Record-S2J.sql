@@ -587,7 +587,7 @@ EXEC spInsTrans 'E0031', 'RJ209', 6, '2018-01-04', 0, '3175041708450007', 'Bunga
 					088305949394, 'bunga.sartika@harvard.edu', 'Jl Walkstreet No 10', 67890, 'Surabaya', 'Jawa Timur', '4577-5413-4332-7542', 'Bunga Sartika', 'Mandiri'
 EXEC spInsTrans 'E0031', 'RJ308', 5, '2018-01-08', 0, '3175041708450008', 'Iqbal Nugroho', 'M', '1976-09-11', 'Scientist', 
 					084894930390, 'iqbal.nugroho@farma.biz', 'Jl Raya Bogor No 78', 16058, 'Jakarta', 'DKI Jakarta', '1035-2246-6442-4363', 'Iqbal Nugroho', 'Bank DKI'
-EXEC spInsTrans 'E0031', 'RJ407', 1, '2018-01-07', 0, '3175041708450009', 'Farhan Ramadhan', 'M', '1990-12-21', 'Police', 
+EXEC spInsTrans 'E0031', 'RJ407', 1, '2018-01-05', 0, '3175041708450009', 'Farhan Ramadhan', 'M', '1990-12-21', 'Police', 
 					088493090203, 'farhan.ramadhan@eng.ui.ac.id ', 'Jl Djoko Anwar', 16518, 'Flores', 'Nusa Tenggara Timur', '3813-7268-2819-1391', 'Farhan Ramadhan', 'BJB'
 EXEC spInsTrans 'E0031', 'RJ506', 7, '2018-01-06', 0, '3175041708450010', 'Trisya Talia', 'F', '1985-12-12', 'Lawyer', 
 					083983893938, 'trisya.talia@yooho.co.id', 'Jl Gelora Bung Karno', 17818, 'Pontianak', 'Kalimantan Barat', '5229-1361-5321-4212', 'Trisya Talia', 'Bukopin'

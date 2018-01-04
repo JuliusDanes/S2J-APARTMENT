@@ -59,7 +59,7 @@ SELECT * FROM vServant
 
 
 --View Room Is Used
-ALTER VIEW vRoomIsUsed
+CREATE VIEW vRoomIsUsed
 AS
 SELECT R.RoomNum, R.RTypeID, R.Status, M.TransID, C.DateOfCheckIn, C.DateOfCheckOut
 FROM Services.RoomNum R
@@ -73,7 +73,7 @@ SELECT * FROM vRoomIsUsed
 
 
 --View Room Available
-ALTER VIEW vRoomAvailable
+CREATE VIEW vRoomAvailable
 AS
 SELECT R.RoomNum, R.Status, R.RTypeID, T.RTypeName, T.Price
 FROM Services.RoomNum R
@@ -149,9 +149,9 @@ SELECT * FROM vCustTrans
 
 
 --View Receipt
-ALTER VIEW vReceipt
+CREATE VIEW vReceipt
 AS
-SELECT M.TransID, H.TransDate, H.TransTime,U.CustID, U.CustName, E.EmpName AS 'Served by Employee', M.RoomNum, R.RTypeName, R.Price, C.DateOfCheckIn, C.DateOfCheckOut, C.PeriodOfTime, C.TotalCost, I.DP, I.DueDateDP, I.Repayment, I.DueDateRePay, I.AlreadyPaid, I.Unpaid
+SELECT M.TransID, H.TransDate, H.TransTime,U.CustID, U.CustName, E.EmpName AS 'Served by Employee', M.RoomNum, R.RTypeName, R.Price, C.DateOfCheckIn, C.DateOfCheckOut, C.PeriodOfTime, C.TotalCost, I.DP, I.DueDateDP, I.DPStatus, I.Repayment, I.DueDateRePay, I.RePayStatus, I.AlreadyPaid, I.Unpaid
 FROM Transactions.MainTrans M
 INNER JOIN Transactions.TransHistory H
 ON M.TransID = H.TransID
@@ -179,7 +179,7 @@ ORDER BY DateOfCheckIn ASC
 GO
 
 --Hint >> @DCIN DATETIME, @DCOUT DATETIME
-EXEC spvTransHeadbyDate '2018-01-01', '2018-01-03'
+EXEC spvTransHeadbyDate '2018-01-04', '2018-01-06'
 
 
 --Proc View Receipt by Customer
@@ -190,11 +190,11 @@ WHERE CustID = @CustID
 GO
 
 --Hint >> @CustID VARCHAR(5)
-EXEC spvReceipt 'C0005'
+EXEC spvReceipt 'C0009'
 
 
 --Proc View Transaction by Status
-ALTER PROC spvTransbyStatus @TStatus VARCHAR(50), @DPS VARCHAR(10), @RPS VARCHAR(10)
+CREATE PROC spvTransbyStatus @TStatus VARCHAR(50), @DPS VARCHAR(10), @RPS VARCHAR(10)
 AS
 SELECT TransID, TransDate, TransTime, Status, DP, DPStatus, Repayment, RePayStatus, AlreadyPaid, Unpaid
 FROM vMainTrans
@@ -206,3 +206,17 @@ EXEC spvTransbyStatus 'Waiting', 'Unpaid', 'Unpaid'
 EXEC spvTransbyStatus 'Waiting', 'Paid', 'Unpaid'
 EXEC spvTransbyStatus 'Succeed', 'Paid', 'Paid'
 EXEC spvTransbyStatus 'Cancelled', 'Unpaid', 'Unpaid'
+
+
+		--- SELECT VIEW ---
+SELECT * FROM vIncDiv
+SELECT * FROM vEmployee
+SELECT * FROM vRoom
+SELECT * FROM vRoomAvailable
+SELECT * FROM vRoomIsUsed
+SELECT * FROM vServant
+SELECT * FROM vCustData
+SELECT * FROM vCustTrans
+SELECT * FROM vMainTrans
+SELECT * FROM vTransHeader
+SELECT * FROM vReceipt

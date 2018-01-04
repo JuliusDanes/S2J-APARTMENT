@@ -19,7 +19,6 @@ CREATE SCHEMA Log;
 
 		--- CREATE TABLE ---
 --Create Table Employee
-DROP TABLE HumanResources.Divisions;
 CREATE TABLE HumanResources.Divisions(
 	DivID	VARCHAR(10) CHECK(DivID NOT LIKE '%[!~`@#$%^&*()_+-={}:<>?\;'',/(0-9)]%') PRIMARY KEY NOT NULL,
 	DivName	VARCHAR(30) NOT NULL,
@@ -30,14 +29,12 @@ SP_HELP 'HumanResources.Divisions'
 ALTER TABLE HumanResources.Divisions
 ADD CONSTRAINT fkChiefID FOREIGN KEY (ChiefID) REFERENCES HumanResources.Employee(EmpID) ON DELETE SET NULL ON UPDATE CASCADE;
 
-DROP TABLE HumanResources.Incumbency;
 CREATE TABLE HumanResources.Incumbency(
 	IncumbencyID	VARCHAR(10) CHECK(IncumbencyID NOT LIKE '%[!~`@#$%^&*()_+-={}:<>?\;'',/(0-9)]%') PRIMARY KEY NOT NULL,
 	IncumbencyName	VARCHAR(100) NOT NULL,
 	DivID			VARCHAR(10) FOREIGN KEY (DivID) REFERENCES HumanResources.Divisions(DivID) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL
 );
 
-DROP TABLE HumanResources.Employee;
 CREATE TABLE HumanResources.Employee(
 	ID				INT IDENTITY NOT NULL,
 	EmpID			VARCHAR(5) DEFAULT 0 PRIMARY KEY NOT NULL,
@@ -51,14 +48,12 @@ CREATE TABLE HumanResources.Employee(
 	Salary			MONEY CHECK(Salary >= 1000000)
 );
 
-DROP TABLE HumanResources.EmpContact;
 CREATE TABLE HumanResources.EmpContact(
 	EmpID		VARCHAR(5) REFERENCES HumanResources.Employee(EmpID) ON DELETE CASCADE ON UPDATE CASCADE PRIMARY KEY NOT NULL,
 	Telephone	BIGINT CHECK(Telephone BETWEEN 1000000 AND 999999999999) UNIQUE NOT NULL,
 	EmaiL		VARCHAR(100) CHECK(Email LIKE '[A-Z]%@[A-Z]%.%')
 );
 
-DROP TABLE HumanResources.EmpAddress;
 CREATE TABLE HumanResources.EmpAddress(
 	EmpID		VARCHAR(5) REFERENCES HumanResources.Employee(EmpID) ON DELETE CASCADE ON UPDATE CASCADE PRIMARY KEY NOT NULL,
 	Address		VARCHAR(200) CHECK(Address NOT LIKE '%[!~`@#$%^&*_+={}:<>?;'']%') NOT NULL,
@@ -67,7 +62,6 @@ CREATE TABLE HumanResources.EmpAddress(
 	Province	VARCHAR(30) CHECK(Province NOT LIKE '%[!~`@#$%^&*_+={}:<>?;'']%')
 );
 
-DROP TABLE HumanResources.EmpAccount;
 CREATE TABLE HumanResources.EmpAccount(
 	EmpID		VARCHAR(5) REFERENCES HumanResources.Employee(EmpID) ON DELETE CASCADE ON UPDATE CASCADE UNIQUE NOT NULL,
 	AccountNum	VARCHAR(19) CHECK(AccountNum LIKE '[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]') UNIQUE NOT NULL,
@@ -266,6 +260,12 @@ DROP TABLE Services.Servant;
 DROP TABLE Services.RoomType;
 DROP TABLE Log.Transactions;
 DROP TABLE Log.Customer;
+DROP TABLE HumanResources.EmpAccount;
+DROP TABLE HumanResources.EmpAddress;
+DROP TABLE HumanResources.EmpContact;
+DROP TABLE HumanResources.Employee;
+DROP TABLE HumanResources.Incumbency;
+DROP TABLE HumanResources.Divisions;
 
 
 		--- BACKUP & RESTORE DATABASE ---
